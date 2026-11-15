@@ -1,0 +1,156 @@
+@import "tailwindcss";
+
+:root {
+  --foreman-orange: #c2410c;
+  --sunrise: #f58a3c;
+  --peach: #ffe9d6;
+  --cream: #fff8f1;
+  --cocoa: #2a2320;
+  --text-secondary: #5f524a;
+  --radius-card: 12px;
+  --radius-control: 10px;
+  --font: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+@theme inline {
+  --color-foreman: var(--foreman-orange);
+  --color-sunrise: var(--sunrise);
+  --color-peach: var(--peach);
+  --color-cream: var(--cream);
+  --color-cocoa: var(--cocoa);
+  --color-muted: var(--text-secondary);
+  --font-sans: var(--font-jakarta), system-ui, sans-serif;
+  --radius-card: 12px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--cream);
+  color: var(--cocoa);
+}
+
+.marquee {
+  overflow: clip;
+  max-width: 100%;
+  contain: inline-size;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+::selection {
+  background: var(--peach);
+  color: var(--cocoa);
+}
+
+.select-field {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%232A2320' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1.15rem center;
+}
+
+.note-loop {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.note-loop-1 {
+  animation: note-1 9s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.note-loop-2 {
+  animation: note-2 9s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.note-loop-3 {
+  animation: note-3 9s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+@keyframes note-1 {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  6%,
+  72% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  82%,
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes note-2 {
+  0%,
+  14% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  20%,
+  72% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  82%,
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes note-3 {
+  0%,
+  28% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  34%,
+  72% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  82%,
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 42s linear infinite;
+}
+
+.marquee:hover .marquee-track,
+.marquee:focus-within .marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .marquee-track,
+  .note-loop-1,
+  .note-loop-2,
+  .note-loop-3 {
+    animation: none;
+  }
+
+  .note-loop {
+    opacity: 1;
+    transform: none;
+  }
+}

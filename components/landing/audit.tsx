@@ -1,0 +1,23 @@
+import { Container, CtaLink, Eyebrow, demoCta, demoHref } from "@/components/ui";
+
+export function Audit() {
+  return (
+    <section className="bg-peach py-20 sm:py-28">
+      <Container>
+        <div className="mx-auto max-w-3xl text-center">
+          <Eyebrow on="peach">Free 20-minute demo</Eyebrow>
+          <h2 className="mt-4 text-[2.25rem] leading-[1.05] font-extrabold tracking-[-0.02em] text-balance text-cocoa sm:text-5xl">
+            See where you could be missing customers
+          </h2>
+          <p className="mt-5 text-[18px] leading-[1.6] text-muted sm:text-[19px]">
+            A short look at your website, your Google listing, and the calls
+            that could be coming your way.
+          </p>
+          <div className="mt-8">
+            <CtaLink href={demoHref}>{demoCta}</CtaLink>
+          </div>
+        </div>
+      </Container>
+    </section>
+  );
+}

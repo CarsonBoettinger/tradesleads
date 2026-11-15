@@ -1,0 +1,40 @@
+const trades = [
+  "Plumbing",
+  "Roofing",
+  "Electrical",
+  "HVAC",
+  "Building",
+  "Landscaping",
+];
+
+export function TradeStrip() {
+  return (
+    <section
+      className="marquee w-full border-y-2 border-peach bg-white py-5"
+      aria-label="Trades Foreman is built for"
+    >
+      <div className="marquee-track">
+        <TradeRow />
+        <TradeRow hidden />
+      </div>
+    </section>
+  );
+}
+
+function TradeRow({ hidden = false }: { hidden?: boolean }) {
+  return (
+    <ul className="flex items-center" aria-hidden={hidden || undefined}>
+      {trades.map((trade) => (
+        <li key={trade} className="flex items-center pr-10">
+          <span className="text-lg font-extrabold tracking-[-0.02em] text-cocoa">
+            {trade}
+          </span>
+          <span
+            className="ml-10 size-1.5 shrink-0 rounded-full bg-sunrise"
+            aria-hidden="true"
+          />
+        </li>
+      ))}
+    </ul>
+  );
+}
