@@ -1,31 +1,6 @@
+import Link from "next/link";
 import { Container, Eyebrow } from "@/components/ui";
-
-const trades = [
-  {
-    name: "Plumbers",
-    body: "Emergency calls, and the repairs that follow them.",
-  },
-  {
-    name: "Roofers",
-    body: "Storm searches, inspections, and the jobs they turn into.",
-  },
-  {
-    name: "Electricians",
-    body: "Panels, rewires, and the calls that come in between.",
-  },
-  {
-    name: "HVAC",
-    body: "Breakdowns, tune-ups, and the turn of the season.",
-  },
-  {
-    name: "Builders",
-    body: "Projects that start when someone searches for a crew.",
-  },
-  {
-    name: "Landscapers",
-    body: "Yards, seasons, and the customers who come back.",
-  },
-];
+import { tradeHref, trades } from "@/lib/trades";
 
 export function Trades() {
   return (
@@ -40,16 +15,18 @@ export function Trades() {
         </p>
         <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {trades.map((trade) => (
-            <li
-              key={trade.name}
-              className="rounded-xl border-2 border-peach bg-cream p-7 motion-safe:transition-transform motion-safe:hover:-translate-y-0.5 sm:p-8"
-            >
-              <h3 className="text-2xl leading-none font-extrabold tracking-[-0.02em] text-cocoa">
-                {trade.name}
-              </h3>
-              <p className="mt-4 text-[17px] leading-relaxed text-muted">
-                {trade.body}
-              </p>
+            <li key={trade.slug}>
+              <Link
+                href={tradeHref(trade.slug)}
+                className="block h-full rounded-xl border-2 border-peach bg-cream p-7 motion-safe:transition-transform motion-safe:hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreman sm:p-8"
+              >
+                <h3 className="text-2xl leading-none font-extrabold tracking-[-0.02em] text-cocoa">
+                  {trade.name}
+                </h3>
+                <p className="mt-4 text-[17px] leading-relaxed text-muted">
+                  {trade.blurb}
+                </p>
+              </Link>
             </li>
           ))}
         </ul>

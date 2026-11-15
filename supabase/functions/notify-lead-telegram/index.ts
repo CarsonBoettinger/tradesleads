@@ -13,11 +13,18 @@ type LeadRecord = {
   best_time?: string;
   source?: string | null;
   comments?: string | null;
+  tags?: string[] | null;
 };
+
+function leadHeadline(tags: string[] | null | undefined) {
+  if (tags?.includes("report")) return "📊 Presence report lead - call them";
+  if (tags?.includes("free demo")) return "📞 Free demo lead - call them";
+  return "📞 Inbound lead - call them";
+}
 
 function formatMessage(lead: LeadRecord) {
   const lines = [
-    "📞 Inbound demo lead - call them",
+    leadHeadline(lead.tags),
     "",
     `${lead.first_name ?? ""} ${lead.last_name ?? ""}`.trim(),
     lead.business ?? "",
@@ -28,6 +35,7 @@ function formatMessage(lead: LeadRecord) {
     `🕐 Best time: ${lead.best_time ?? ""}`,
   ];
 
+  if (lead.tags?.length) lines.push(`🏷️ Tag: ${lead.tags.join(", ")}`);
   if (lead.source) lines.push(`🔎 Heard via: ${lead.source}`);
   if (lead.comments) {
     lines.push("", `Notes: ${lead.comments}`);

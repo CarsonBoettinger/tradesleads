@@ -12,6 +12,19 @@ export type DemoLeadInput = {
   consent: boolean;
 };
 
+export const LEAD_TAG_FREE_DEMO = "free demo";
+export const LEAD_TAG_REPORT = "report";
+
+export type LeadTag = typeof LEAD_TAG_FREE_DEMO | typeof LEAD_TAG_REPORT;
+
+export type LeadDirection = "inbound" | "outbound";
+
+export type LeadChannel =
+  | "free_demo"
+  | "presence_report"
+  | "manual"
+  | "import";
+
 export type DemoLeadRow = {
   first_name: string;
   last_name: string;
@@ -24,6 +37,11 @@ export type DemoLeadRow = {
   source: string | null;
   comments: string | null;
   consent: boolean;
+  tags: LeadTag[];
+  direction: LeadDirection;
+  channel: LeadChannel;
+  place_id: string | null;
+  report_id: string | null;
 };
 
 const trades = new Set([
@@ -106,5 +124,10 @@ export function toLeadRow(data: DemoLeadInput): DemoLeadRow {
     source: data.source || null,
     comments: data.comments || null,
     consent: data.consent,
+    tags: [LEAD_TAG_FREE_DEMO],
+    direction: "inbound",
+    channel: "free_demo",
+    place_id: null,
+    report_id: null,
   };
 }

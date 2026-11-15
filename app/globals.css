@@ -146,6 +146,150 @@ body {
   animation-play-state: paused;
 }
 
+.scan-line {
+  animation: scan-sweep 2.4s ease-in-out infinite;
+}
+
+.website-scan {
+  animation: website-sweep 2.2s linear infinite;
+}
+
+.competitor-pin {
+  opacity: 0;
+  animation: pin-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.report-map-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.report-map-pin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translate(-50%, -100%);
+  animation: report-map-pin-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  filter: drop-shadow(0 2px 4px rgba(28, 25, 23, 0.22));
+  pointer-events: none;
+}
+
+.report-map-pin--you {
+  z-index: 2;
+}
+
+.report-map-pin__label {
+  max-width: 9.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.report-map-pin__dot {
+  margin-top: 4px;
+  border-radius: 999px;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 2px rgba(28, 25, 23, 0.25);
+}
+
+@keyframes report-map-pin-pop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -130%) scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -100%) scale(1);
+  }
+}
+
+.review-card {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: review-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.review-scan {
+  background: linear-gradient(
+    100deg,
+    transparent 35%,
+    rgba(194, 65, 12, 0.12) 50%,
+    transparent 65%
+  );
+  background-size: 220% 100%;
+  animation: review-shine 2s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes scan-sweep {
+  0% {
+    transform: translateY(0);
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translateY(170px);
+    opacity: 0.1;
+  }
+}
+
+@keyframes website-sweep {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes pin-pop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -120%) scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -100%) scale(1);
+  }
+}
+
+@keyframes review-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes review-shine {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -120% 0;
+  }
+}
+
+@keyframes toolbox-idle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.toolbox-idle {
+  animation: toolbox-idle 2.4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -154,11 +298,21 @@ body {
   .marquee-track,
   .note-loop-1,
   .note-loop-2,
-  .note-loop-3 {
+  .note-loop-3,
+  .scan-line,
+  .website-scan,
+  .competitor-pin,
+  .report-map-pin,
+  .review-card,
+  .review-scan,
+  .toolbox-idle {
     animation: none;
   }
 
-  .note-loop {
+  .note-loop,
+  .competitor-pin,
+  .report-map-pin,
+  .review-card {
     opacity: 1;
     transform: none;
   }

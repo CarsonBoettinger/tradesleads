@@ -11,7 +11,7 @@ import { absoluteUrl } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Blog",
   description:
-    "Quick marketing and local-search tips for trade owners who can’t afford to lose another customer — Google, websites, reviews, and getting calls.",
+    "Quick marketing and local-search tips for trade owners who can’t afford to lose another customer - Google, websites, reviews, and getting calls.",
   alternates: { canonical: absoluteUrl("/blog") },
   openGraph: {
     title: "Blog | FOREMAN",
@@ -52,7 +52,7 @@ export default async function BlogIndexPage() {
             </h1>
             <p className="mt-6 text-[18px] leading-[1.6] text-muted">
               Quick, useful advice on Google, websites, reviews, and booking
-              jobs — written for busy trade shops. A new tip lands here every
+              jobs - written for busy trade shops. A new tip lands here every
               day.
             </p>
           </div>

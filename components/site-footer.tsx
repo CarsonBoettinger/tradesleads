@@ -1,4 +1,5 @@
 import { Logo } from "@/components/logo";
+import { tradeHref, trades } from "@/lib/trades";
 
 const visit = [
   { href: "/#found", label: "Get found" },
@@ -7,15 +8,6 @@ const visit = [
   { href: "/#how", label: "How it works" },
   { href: "/blog", label: "Blog" },
   { href: "/free-demo", label: "Book a free demo" },
-];
-
-const trades = [
-  "Plumbers",
-  "Roofers",
-  "Electricians",
-  "HVAC",
-  "Builders",
-  "Landscapers",
 ];
 
 export function SiteFooter() {
@@ -55,8 +47,13 @@ export function SiteFooter() {
           </h2>
           <ul className="mt-4 space-y-2">
             {trades.map((trade) => (
-              <li key={trade} className="text-[17px] text-[#eadfd6]">
-                {trade}
+              <li key={trade.slug}>
+                <a
+                  href={tradeHref(trade.slug)}
+                  className="inline-flex min-h-11 items-center text-[17px] font-bold text-cream underline decoration-transparent underline-offset-4 hover:decoration-cream focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
+                >
+                  {trade.name}
+                </a>
               </li>
             ))}
           </ul>

@@ -31,7 +31,7 @@ function renderArticle(topic: BlogTopic) {
 
 ${topic.angle}
 
-This is a practical guide for busy ${tradeLabelFor(topic.trade)} — the kind of tip you can use this week, not a lecture.
+This is a practical guide for busy ${tradeLabelFor(topic.trade)} - the kind of tip you can use this week, not a lecture.
 
 ${sections}
 
@@ -92,7 +92,7 @@ async function generateWithOpenAI(topic: BlogTopic): Promise<string | null> {
   const model = process.env.OPENAI_BLOG_MODEL ?? "gpt-4.1-mini";
   const system = `You write blog posts for FOREMAN, which helps trade businesses (plumbers, roofers, electricians, HVAC, builders, landscapers) get found online and get more booked jobs.
 
-Tone model: useful owner tips like SpotHopper’s restaurant marketing blog — practical, scannable, problem-solving. Teach something an owner can do this week.
+Tone model: useful owner tips like SpotHopper’s restaurant marketing blog - practical, scannable, problem-solving. Teach something an owner can do this week.
 
 Voice: friendly, plain, trade-smart. Short sentences. Active verbs. Speak to "you". No exclamation marks in headlines. No invented statistics, testimonials, or client names. No agency jargon (synergy, funnel, omnichannel, unlock, disrupt).
 

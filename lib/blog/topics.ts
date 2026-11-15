@@ -1,7 +1,7 @@
 import type { BlogTopic } from "./types";
 
 /**
- * Owner-facing tip topics — same job as SpotHopper’s restaurant blog,
+ * Owner-facing tip topics - same job as SpotHopper’s restaurant blog,
  * for trades: useful how-tos that help shops get found, booked, and paid.
  * Keywords stay in the background for SEO; the article must teach something useful.
  */
