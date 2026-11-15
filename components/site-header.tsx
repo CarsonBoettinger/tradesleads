@@ -10,6 +10,7 @@ const links = [
   { href: "/#remembered", label: "Stay in mind" },
   { href: "/#booked", label: "Booked jobs" },
   { href: "/#how", label: "How it works" },
+  { href: "/blog", label: "Blog" },
 ];
 
 export function SiteHeader() {

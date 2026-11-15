@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "blog:generate": "curl -sS -H \"Authorization: Bearer $CRON_SECRET\" \"${SITE_URL:-http://localhost:3000}/api/cron/daily-blog\""
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.109.0",

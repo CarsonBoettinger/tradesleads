@@ -1,5 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { JsonLd } from "@/components/json-ld";
+import {
+  defaultTitle,
+  organizationJsonLd,
+  siteDescriptor,
+  siteName,
+  websiteJsonLd,
+} from "@/lib/seo";
+import { getSiteUrl } from "@/lib/site";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -8,24 +17,52 @@ const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
 });
 
-const description =
-  "Websites and local search growth for the businesses that build our world. For plumbers, roofers, electricians, HVAC, builders, and landscapers.";
-
 export const metadata: Metadata = {
-  title: "FOREMAN - Built to get you found",
-  description,
-  applicationName: "FOREMAN",
+  metadataBase: new URL(getSiteUrl()),
+  title: {
+    default: defaultTitle,
+    template: `%s | ${siteName}`,
+  },
+  description: siteDescriptor,
+  applicationName: siteName,
+  keywords: [
+    "websites for plumbers",
+    "SEO for plumbers",
+    "local SEO for HVAC",
+    "websites for roofers",
+    "Google Business Profile for contractors",
+    "trade business websites",
+    "contractor website that gets calls",
+  ],
+  authors: [{ name: siteName }],
+  creator: siteName,
+  publisher: siteName,
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "FOREMAN - Built to get you found",
-    description,
+    title: defaultTitle,
+    description: siteDescriptor,
     type: "website",
     locale: "en_US",
-    siteName: "FOREMAN",
+    siteName,
+    url: "/",
   },
   twitter: {
-    card: "summary",
-    title: "FOREMAN - Built to get you found",
-    description,
+    card: "summary_large_image",
+    title: defaultTitle,
+    description: siteDescriptor,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
 };
 
@@ -36,8 +73,12 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${jakarta.variable} h-full antialiased`}>
-      <body className="min-h-full bg-cream font-sans text-cocoa">{children}</body>
+    <html lang="en" className={`${jakarta.variable} antialiased`}>
+      <body className="min-h-dvh bg-cream font-sans text-cocoa">
+        <JsonLd data={organizationJsonLd()} />
+        <JsonLd data={websiteJsonLd()} />
+        {children}
+      </body>
     </html>
   );
 }

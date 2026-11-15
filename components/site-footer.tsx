@@ -5,6 +5,7 @@ const visit = [
   { href: "/#remembered", label: "Stay in mind" },
   { href: "/#booked", label: "Booked jobs" },
   { href: "/#how", label: "How it works" },
+  { href: "/blog", label: "Blog" },
   { href: "/free-demo", label: "Book a free demo" },
 ];
 

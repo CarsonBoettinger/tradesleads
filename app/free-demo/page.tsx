@@ -3,19 +3,22 @@ import { DemoForm } from "@/components/demo-form";
 import { Container, Eyebrow } from "@/components/ui";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { absoluteUrl } from "@/lib/site";
 
 const description =
   "A free 20-minute demo of how your trade business shows up on Google and on your website.";
 
 export const metadata: Metadata = {
-  title: "Book a free demo - FOREMAN",
+  title: "Book a free demo",
   description,
+  alternates: { canonical: absoluteUrl("/free-demo") },
   openGraph: {
-    title: "Book a free demo - FOREMAN",
+    title: "Book a free demo | FOREMAN",
     description,
     type: "website",
     locale: "en_US",
     siteName: "FOREMAN",
+    url: absoluteUrl("/free-demo"),
   },
 };
 

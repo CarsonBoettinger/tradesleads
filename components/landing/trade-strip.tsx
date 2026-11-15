@@ -10,12 +10,14 @@ const trades = [
 export function TradeStrip() {
   return (
     <section
-      className="marquee w-full border-y-2 border-peach bg-white py-5"
+      className="border-y-2 border-peach bg-white py-5"
       aria-label="Trades Foreman is built for"
     >
-      <div className="marquee-track">
-        <TradeRow />
-        <TradeRow hidden />
+      <div className="marquee">
+        <div className="marquee-track">
+          <TradeRow />
+          <TradeRow hidden />
+        </div>
       </div>
     </section>
   );

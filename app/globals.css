@@ -25,17 +25,26 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
   background: var(--cream);
   color: var(--cocoa);
+  overflow-x: hidden;
 }
 
 .marquee {
-  overflow: clip;
+  overflow: hidden;
+  width: 100%;
   max-width: 100%;
-  contain: inline-size;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
   mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
 }
 
