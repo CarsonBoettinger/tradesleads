@@ -1,4 +1,4 @@
-const FALLBACK_SITE_URL = "https://foreman.local";
+const FALLBACK_SITE_URL = "https://kalvez.com";
 
 export function getSiteUrl() {
   const raw =

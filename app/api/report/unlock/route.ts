@@ -1,8 +1,25 @@
-import { LEAD_TAG_REPORT } from "@/lib/leads";
+import { parseEmail, parsePhone } from "@/lib/contact";
+import {
+  findExistingLead,
+  findExistingReportForLead,
+  LEAD_TAG_REPORT,
+} from "@/lib/leads";
 import { clientIp, rateLimit } from "@/lib/report/rate-limit";
 import { clampText, isUuid, safeEqual } from "@/lib/report/security";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import type { PresenceReportRow, ScorePayload } from "@/lib/report/types";
+
+function scoreResponse(scorePayload: ScorePayload, reused = false) {
+  return {
+    ok: true,
+    unlocked: true,
+    reused,
+    score: scorePayload.score,
+    keywords: scorePayload.keywords,
+    web: scorePayload.web,
+    competitors: scorePayload.competitors,
+  };
+}
 
 export async function POST(request: Request) {
   const limited = rateLimit({
@@ -44,11 +61,11 @@ export async function POST(request: Request) {
     typeof raw.lastName === "string" ? raw.lastName : "",
     80,
   );
-  const email = clampText(
+  const emailRaw = clampText(
     typeof raw.email === "string" ? raw.email : "",
     160,
-  ).toLowerCase();
-  const phone = clampText(
+  );
+  const phoneRaw = clampText(
     typeof raw.phone === "string" ? raw.phone : "",
     40,
   );
@@ -63,18 +80,21 @@ export async function POST(request: Request) {
   if (!lastName) {
     return Response.json({ error: "Last name is required." }, { status: 400 });
   }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return Response.json({ error: "A valid email is required." }, { status: 400 });
+
+  const emailParsed = parseEmail(emailRaw);
+  if (!emailParsed.ok) {
+    return Response.json({ error: emailParsed.error }, { status: 400 });
   }
-  if (phone.replace(/\D/g, "").length < 7) {
-    return Response.json(
-      { error: "A valid phone number is required." },
-      { status: 400 },
-    );
+  const phoneParsed = parsePhone(phoneRaw);
+  if (!phoneParsed.ok) {
+    return Response.json({ error: phoneParsed.error }, { status: 400 });
   }
   if (!consent) {
     return Response.json({ error: "Consent is required." }, { status: 400 });
   }
+
+  const email = emailParsed.email;
+  const phone = phoneParsed.phone;
 
   try {
     const supabase = getSupabaseAdmin();
@@ -106,18 +126,87 @@ export async function POST(request: Request) {
       );
     }
 
-    let leadId = row.lead_id;
-    const scorePayload = row.score_payload as ScorePayload;
+    const currentScore = row.score_payload as ScorePayload;
 
-    if (row.status === "unlocked" && leadId) {
-      return Response.json({
-        ok: true,
-        unlocked: true,
-        score: scorePayload.score,
-        keywords: scorePayload.keywords,
-        web: scorePayload.web,
-        competitors: scorePayload.competitors,
+    if (row.status === "unlocked" && row.lead_id) {
+      return Response.json(scoreResponse(currentScore));
+    }
+
+    const existingLead = await findExistingLead({
+      email,
+      phoneDigits: phoneParsed.digits,
+      placeId: row.place_id,
+    });
+
+    if (existingLead) {
+      const existingReport = await findExistingReportForLead({
+        leadId: existingLead.id,
+        placeId: row.place_id,
+        reportId: existingLead.report_id,
       });
+
+      // Same business already reported for this lead: reuse that report card.
+      if (
+        existingReport &&
+        existingReport.report.place_id === row.place_id &&
+        existingReport.report.id !== row.id
+      ) {
+        await supabase
+          .from("presence_reports")
+          .update({
+            status: "unlocked",
+            lead_id: existingLead.id,
+            contact_first_name: firstName,
+            contact_last_name: lastName,
+            contact_email: email,
+            contact_phone: phone,
+            unlocked_at: new Date().toISOString(),
+          })
+          .eq("id", reportId)
+          .eq("unlock_token", unlockToken);
+
+        return Response.json(scoreResponse(existingReport.scorePayload, true));
+      }
+
+      await supabase
+        .from("leads")
+        .update({
+          first_name: firstName,
+          last_name: lastName,
+          phone,
+          business: row.business_name,
+          town: row.town || "Unknown",
+          trade: row.trade,
+          place_id: row.place_id,
+          report_id: row.id,
+          consent: true,
+        })
+        .eq("id", existingLead.id);
+
+      const { error: updateError } = await supabase
+        .from("presence_reports")
+        .update({
+          status: "unlocked",
+          lead_id: existingLead.id,
+          contact_first_name: firstName,
+          contact_last_name: lastName,
+          contact_email: email,
+          contact_phone: phone,
+          unlocked_at: new Date().toISOString(),
+        })
+        .eq("id", reportId)
+        .eq("unlock_token", unlockToken)
+        .in("status", ["ready", "unlocked"]);
+
+      if (updateError) {
+        console.error("Report unlock update failed:", updateError);
+        return Response.json(
+          { error: "Could not unlock report." },
+          { status: 500 },
+        );
+      }
+
+      return Response.json(scoreResponse(currentScore, true));
     }
 
     const { data: lead, error: leadError } = await supabase
@@ -151,13 +240,11 @@ export async function POST(request: Request) {
       );
     }
 
-    leadId = lead.id;
-
     const { error: updateError } = await supabase
       .from("presence_reports")
       .update({
         status: "unlocked",
-        lead_id: leadId,
+        lead_id: lead.id,
         contact_first_name: firstName,
         contact_last_name: lastName,
         contact_email: email,
@@ -176,14 +263,7 @@ export async function POST(request: Request) {
       );
     }
 
-    return Response.json({
-      ok: true,
-      unlocked: true,
-      score: scorePayload.score,
-      keywords: scorePayload.keywords,
-      web: scorePayload.web,
-      competitors: scorePayload.competitors,
-    });
+    return Response.json(scoreResponse(currentScore));
   } catch (error) {
     console.error("Report unlock failed:", error);
     return Response.json(

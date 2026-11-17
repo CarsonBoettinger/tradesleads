@@ -32,7 +32,7 @@ export function Found() {
               Show up when someone is ready to hire
             </h2>
             <p className="mt-5 max-w-xl text-[18px] leading-[1.6] text-muted sm:text-[19px]">
-              People search, look at a few names, and call. Foreman is how
+              People search, look at a few names, and call. Kalvez is how
               your business earns a place in that short list.
             </p>
             <ul className="mt-8 space-y-6">

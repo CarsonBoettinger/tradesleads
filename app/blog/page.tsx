@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     "Quick marketing and local-search tips for trade owners who can’t afford to lose another customer - Google, websites, reviews, and getting calls.",
   alternates: { canonical: absoluteUrl("/blog") },
   openGraph: {
-    title: "Blog | FOREMAN",
+    title: "Blog | Kalvez",
     description:
       "Useful tips for plumbers, roofers, electricians, HVAC, builders, and landscapers.",
     url: absoluteUrl("/blog"),

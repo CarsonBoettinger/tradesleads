@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { formatPhone, parseEmail, parsePhone } from "@/lib/contact";
 import { demoCta, primaryButtonClass } from "@/components/ui";
 
 type FieldName =
@@ -58,12 +59,13 @@ function validate(values: FormState) {
   const errors: Partial<Record<FieldName, string>> = {};
   if (!values.firstName.trim()) errors.firstName = "Add your first name.";
   if (!values.lastName.trim()) errors.lastName = "Add your last name.";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) {
-    errors.email = "Add an email address.";
-  }
-  if (values.phone.replace(/\D/g, "").length < 7) {
-    errors.phone = "Add a mobile number.";
-  }
+
+  const emailParsed = parseEmail(values.email);
+  if (!emailParsed.ok) errors.email = emailParsed.error;
+
+  const phoneParsed = parsePhone(values.phone);
+  if (!phoneParsed.ok) errors.phone = phoneParsed.error;
+
   if (!values.business.trim()) errors.business = "Add your business name.";
   if (!values.town.trim()) errors.town = "Add your town.";
   if (!values.trade) errors.trade = "Choose a trade.";
@@ -98,14 +100,25 @@ export function DemoForm() {
     setSubmitError(null);
     if (Object.keys(nextErrors).length > 0) return;
 
+    const emailParsed = parseEmail(values.email);
+    const phoneParsed = parsePhone(values.phone);
+    if (!emailParsed.ok || !phoneParsed.ok) return;
+
+    const normalized = {
+      ...values,
+      email: emailParsed.email,
+      phone: phoneParsed.phone,
+    };
+    setValues(normalized);
+
     setSubmitting(true);
     try {
       const response = await fetch("/api/demo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...values,
-          consent: values.consent === "yes",
+          ...normalized,
+          consent: normalized.consent === "yes",
         }),
       });
 
@@ -139,7 +152,7 @@ export function DemoForm() {
           Got it, {values.firstName.trim()}.
         </h2>
         <p className="mt-4 text-[17px] leading-relaxed text-muted">
-          We have your demo request. Someone from Foreman will call you at the
+          We have your demo request. Someone from Kalvez will call you at the
           time that works best.
         </p>
       </div>
@@ -197,6 +210,7 @@ export function DemoForm() {
         error={errors.email}
         autoComplete="email"
         inputMode="email"
+        placeholder="name@company.com"
         onChange={(value) => update("email", value)}
       />
       <Field
@@ -206,7 +220,8 @@ export function DemoForm() {
         error={errors.phone}
         autoComplete="tel"
         inputMode="tel"
-        onChange={(value) => update("phone", value)}
+        placeholder="(519) 555-0123"
+        onChange={(value) => update("phone", formatPhone(value))}
       />
       <Field
         id={`${baseId}-business`}
@@ -247,7 +262,7 @@ export function DemoForm() {
         />
         <SelectField
           id={`${baseId}-source`}
-          label="How did you hear about Foreman?"
+          label="How did you hear about Kalvez?"
           value={values.source}
           error={errors.source}
           placeholder="Choose one"
@@ -315,6 +330,7 @@ function Field({
   error,
   autoComplete,
   inputMode,
+  placeholder,
   onChange,
 }: {
   id: string;
@@ -323,6 +339,7 @@ function Field({
   error?: string;
   autoComplete: string;
   inputMode?: "email" | "tel";
+  placeholder?: string;
   onChange: (value: string) => void;
 }) {
   return (
@@ -337,6 +354,7 @@ function Field({
         required
         autoComplete={autoComplete}
         inputMode={inputMode}
+        placeholder={placeholder}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${id}-error` : undefined}
         onChange={(event) => onChange(event.target.value)}

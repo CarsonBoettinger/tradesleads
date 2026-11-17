@@ -15,11 +15,11 @@ export function Logo({ tone = "cocoa" }: { tone?: "cocoa" | "cream" }) {
     <span className="inline-flex items-center gap-3.5">
       <Mark />
       <span
-        className={`text-[1.35rem] leading-none font-extrabold tracking-[0.06em] uppercase ${
+        className={`text-[1.35rem] leading-none font-extrabold tracking-[-0.02em] ${
           tone === "cream" ? "text-cream" : "text-cocoa"
         }`}
       >
-        FOREMAN
+        Kalvez
       </span>
     </span>
   );

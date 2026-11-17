@@ -24,7 +24,7 @@ export const trades: TradePage[] = [
     blurb: "Emergency calls, and the repairs that follow them.",
     searchExample: "plumber near me",
     summary:
-      "Emergency calls, and the repairs that follow them. Foreman helps plumbing businesses show up on Google and on a site that turns a search into a phone call.",
+      "Emergency calls, and the repairs that follow them. Kalvez helps plumbing businesses show up on Google and on a site that turns a search into a phone call.",
     pains: [
       {
         title: "They call whoever is first",
@@ -65,7 +65,7 @@ export const trades: TradePage[] = [
     blurb: "Storm searches, inspections, and the jobs they turn into.",
     searchExample: "roofer in your town",
     summary:
-      "Storm searches, inspections, and the jobs they turn into. Foreman helps roofing businesses earn a spot when neighbours look for a crew they can trust.",
+      "Storm searches, inspections, and the jobs they turn into. Kalvez helps roofing businesses earn a spot when neighbours look for a crew they can trust.",
     pains: [
       {
         title: "Storm season is a race",
@@ -106,7 +106,7 @@ export const trades: TradePage[] = [
     blurb: "Panels, rewires, and the calls that come in between.",
     searchExample: "electrician near me",
     summary:
-      "Panels, rewires, and the calls that come in between. Foreman helps electrical contractors get found by people who are ready to hire.",
+      "Panels, rewires, and the calls that come in between. Kalvez helps electrical contractors get found by people who are ready to hire.",
     pains: [
       {
         title: "Licensed matters, but search decides",
@@ -147,7 +147,7 @@ export const trades: TradePage[] = [
     blurb: "Breakdowns, tune-ups, and the turn of the season.",
     searchExample: "AC repair near me",
     summary:
-      "Breakdowns, tune-ups, and the turn of the season. Foreman helps HVAC businesses show up when the system fails and when people plan ahead.",
+      "Breakdowns, tune-ups, and the turn of the season. Kalvez helps HVAC businesses show up when the system fails and when people plan ahead.",
     pains: [
       {
         title: "They search the machine, not HVAC",
@@ -188,7 +188,7 @@ export const trades: TradePage[] = [
     blurb: "Projects that start when someone searches for a crew.",
     searchExample: "builder in your town",
     summary:
-      "Projects that start when someone searches for a crew. Foreman helps builders look established online so the right jobs find you.",
+      "Projects that start when someone searches for a crew. Kalvez helps builders look established online so the right jobs find you.",
     pains: [
       {
         title: "Projects start with a search",
@@ -229,7 +229,7 @@ export const trades: TradePage[] = [
     blurb: "Yards, seasons, and the customers who come back.",
     searchExample: "landscaper near me",
     summary:
-      "Yards, seasons, and the customers who come back. Foreman helps landscaping businesses get found when neighbours need outdoor work done right.",
+      "Yards, seasons, and the customers who come back. Kalvez helps landscaping businesses get found when neighbours need outdoor work done right.",
     pains: [
       {
         title: "Season opens and phones go quiet",

@@ -1,9 +1,9 @@
 import { absoluteUrl, getSiteUrl } from "@/lib/site";
 
-export const siteName = "FOREMAN";
+export const siteName = "Kalvez";
 export const siteDescriptor =
   "Websites and local search growth for the businesses that build our world.";
-export const defaultTitle = "FOREMAN - Built to get you found";
+export const defaultTitle = "Kalvez - Built to get you found";
 
 export function organizationJsonLd() {
   return {

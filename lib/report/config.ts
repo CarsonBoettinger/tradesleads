@@ -1,5 +1,4 @@
 import { placesConfigured } from "@/lib/report/places";
-import { serpConfigured } from "@/lib/report/serp";
 
 export function isProductionRuntime() {
   return (
@@ -21,7 +20,7 @@ export function allowReportDemoMode() {
 }
 
 export function reportProvidersReady() {
-  return placesConfigured() && serpConfigured();
+  return placesConfigured();
 }
 
 export function shouldUseReportDemoData() {
@@ -31,16 +30,17 @@ export function shouldUseReportDemoData() {
 }
 
 export function missingReportProviderMessage() {
-  const missing: string[] = [];
-  if (!placesConfigured()) missing.push("GOOGLE_PLACES_API_KEY");
-  if (!serpConfigured()) missing.push("SERPAPI_API_KEY");
-  if (!missing.length) return null;
-  return `Report providers are not configured. Set ${missing.join(" and ")}.`;
+  if (placesConfigured()) return null;
+  return "Report providers are not configured. Set GOOGLE_PLACES_API_KEY.";
 }
 
-/** Cap SerpAPI calls per report. Default 3 (each keyword = 1 search). */
-export function serpKeywordLimit() {
-  const raw = Number(process.env.SERPAPI_KEYWORD_LIMIT ?? "3");
+/** Cap Places keyword searches per report. Default 3, max 5. */
+export function reportKeywordLimit() {
+  const raw = Number(
+    process.env.REPORT_KEYWORD_LIMIT ??
+      process.env.SERPAPI_KEYWORD_LIMIT ??
+      "3",
+  );
   if (!Number.isFinite(raw)) return 3;
   return Math.max(1, Math.min(5, Math.round(raw)));
 }

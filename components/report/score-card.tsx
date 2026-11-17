@@ -183,16 +183,15 @@ export function ScoreCardView({
           Key trade searches
         </h3>
         <p className="mt-2 text-base text-muted">
-          Sampled across your ~25-mile service area and nearby towns - limited
-          checks to save search credits.
+          Sampled across your ~25-mile service area and nearby towns with local
+          Google Places results.
         </p>
         <div className="mt-5 overflow-x-auto">
-          <table className="w-full min-w-[520px] text-left text-base">
+          <table className="w-full min-w-[420px] text-left text-base">
             <thead>
               <tr className="border-b border-peach text-sm tracking-[0.08em] uppercase text-muted">
                 <th className="py-3 pr-4 font-bold">Keyword</th>
-                <th className="py-3 pr-4 font-bold">Map pack</th>
-                <th className="py-3 font-bold">Search</th>
+                <th className="py-3 font-bold">Local rank</th>
               </tr>
             </thead>
             <tbody>
@@ -201,11 +200,8 @@ export function ScoreCardView({
                   <td className="py-3 pr-4 font-semibold text-cocoa">
                     {row.keyword}
                   </td>
-                  <td className="py-3 pr-4 text-muted">
-                    {rankLabel(row.mapPackPosition)}
-                  </td>
                   <td className="py-3 text-muted">
-                    {rankLabel(row.organicPosition)}
+                    {rankLabel(row.mapPackPosition)}
                   </td>
                 </tr>
               ))}

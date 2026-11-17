@@ -6,7 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 export const metadata: Metadata = {
   title: "Page not found",
   description:
-    "This page is missing from the job site. Head home - or try FOREMAN's Toolbox Challenge while you're here.",
+    "This page is missing from the job site. Head home - or try Kalvez's Toolbox Challenge while you're here.",
   robots: {
     index: false,
     follow: true,

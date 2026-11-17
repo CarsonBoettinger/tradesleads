@@ -11,7 +11,7 @@ export function TradeStrip() {
   return (
     <section
       className="border-y-2 border-peach bg-white py-5"
-      aria-label="Trades Foreman is built for"
+      aria-label="Trades Kalvez is built for"
     >
       <div className="marquee">
         <div className="marquee-track">

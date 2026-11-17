@@ -13,11 +13,11 @@ export const metadata: Metadata = {
   description,
   alternates: { canonical: absoluteUrl("/report") },
   openGraph: {
-    title: "Free digital presence report | FOREMAN",
+    title: "Free digital presence report | Kalvez",
     description,
     type: "website",
     locale: "en_US",
-    siteName: "FOREMAN",
+    siteName: "Kalvez",
     url: absoluteUrl("/report"),
   },
 };

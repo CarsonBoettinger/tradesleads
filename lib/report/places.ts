@@ -123,16 +123,51 @@ const PLACE_LIST_MASK =
   "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.types,places.primaryType";
 
 export async function searchPlaces(query: string): Promise<PlaceCandidate[]> {
-  const textQuery = query.trim();
+  return searchTextRanked({
+    textQuery: query,
+    pageSize: 8,
+  });
+}
+
+/** Places Text Search ranked by relevance, optionally biased to a service area. */
+export async function searchTextRanked(input: {
+  textQuery: string;
+  lat?: number | null;
+  lng?: number | null;
+  radiusMeters?: number;
+  pageSize?: number;
+}): Promise<PlaceCandidate[]> {
+  const textQuery = input.textQuery.trim();
+  if (!textQuery) return [];
+
+  const body: Record<string, unknown> = {
+    textQuery,
+    pageSize: Math.max(1, Math.min(input.pageSize ?? 20, 20)),
+    languageCode: "en",
+    regionCode: "US",
+    rankPreference: "RELEVANCE",
+  };
+
+  if (
+    input.lat != null &&
+    input.lng != null &&
+    Number.isFinite(input.lat) &&
+    Number.isFinite(input.lng)
+  ) {
+    body.locationBias = {
+      circle: {
+        center: { latitude: input.lat, longitude: input.lng },
+        radius: input.radiusMeters ?? SERVICE_AREA_METERS,
+      },
+    };
+  }
+
   const data = (await placesFetch("/places:searchText", {
     method: "POST",
     headers: {
       "X-Goog-FieldMask": PLACE_LIST_MASK,
     },
-    body: JSON.stringify({
-      textQuery,
-      pageSize: 8,
-    }),
+    body: JSON.stringify(body),
   })) as { places?: Array<Record<string, unknown>> };
 
   return (data.places ?? [])
@@ -271,7 +306,7 @@ async function searchCompetitorsByText(input: {
   const query = input.queries[0];
   if (!query) return results;
 
-  // One Places text query per nearby town (not SerpAPI) to cover the service area.
+  // One Places text query per nearby town to cover the service area.
   for (const town of towns) {
     const textQuery = town ? `${query} near ${town}` : `${query} near me`;
     try {

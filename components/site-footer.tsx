@@ -61,7 +61,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-white/10">
         <p className="mx-auto w-full max-w-6xl px-5 py-6 text-[15px] text-[#eadfd6] sm:px-8">
-          © 2026 FOREMAN
+          © 2026 Kalvez
         </p>
       </div>
     </footer>

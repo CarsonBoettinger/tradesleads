@@ -121,7 +121,7 @@ export default async function BlogPostPage({ params }: PageProps) {
               Built to get you found
             </h2>
             <p className="mt-3 text-[17px] leading-relaxed text-muted">
-              FOREMAN helps trade businesses show up on Google and on a website
+              Kalvez helps trade businesses show up on Google and on a website
               that turns searches into calls.
             </p>
             <a href={demoHref} className={`${primaryButtonClass} mt-6`}>

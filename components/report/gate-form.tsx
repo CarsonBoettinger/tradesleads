@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { formatPhone, parseEmail, parsePhone } from "@/lib/contact";
 import { primaryButtonClass } from "@/components/ui";
 
 const fieldClass =
@@ -31,8 +32,29 @@ export function GateForm({
     event.preventDefault();
     setBusy(true);
     setError(null);
+
+    const emailParsed = parseEmail(email);
+    if (!emailParsed.ok) {
+      setError(emailParsed.error);
+      setBusy(false);
+      return;
+    }
+    const phoneParsed = parsePhone(phone);
+    if (!phoneParsed.ok) {
+      setError(phoneParsed.error);
+      setBusy(false);
+      return;
+    }
+    setPhone(phoneParsed.phone);
+
     try {
-      await onUnlock({ firstName, lastName, email, phone, consent });
+      await onUnlock({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: emailParsed.email,
+        phone: phoneParsed.phone,
+        consent,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not unlock.");
     } finally {
@@ -83,6 +105,8 @@ export function GateForm({
           <input
             className={fieldClass}
             type="email"
+            inputMode="email"
+            placeholder="name@company.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
@@ -94,8 +118,10 @@ export function GateForm({
           <input
             className={fieldClass}
             type="tel"
+            inputMode="tel"
+            placeholder="(519) 555-0123"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={(e) => setPhone(formatPhone(e.target.value))}
             autoComplete="tel"
             required
           />
@@ -108,7 +134,7 @@ export function GateForm({
             onChange={(e) => setConsent(e.target.checked)}
           />
           <span>
-            I agree FOREMAN can contact me about this report and local growth
+            I agree Kalvez can contact me about this report and local growth
             help.
           </span>
         </label>

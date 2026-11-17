@@ -37,7 +37,7 @@ export function SiteHeader() {
         Skip to content
       </a>
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-5 py-3 sm:px-8">
-        <a href="/" aria-label="FOREMAN, home" className="rounded-xl">
+        <a href="/" aria-label="Kalvez, home" className="rounded-xl">
           <Logo />
         </a>
         <nav className="hidden items-center gap-5 xl:flex" aria-label="Page">

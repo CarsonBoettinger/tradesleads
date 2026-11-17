@@ -74,7 +74,7 @@ export async function discoverNearbyTowns(input: {
       cache: "no-store",
       signal: AbortSignal.timeout(7000),
       headers: {
-        "User-Agent": "ForemanPresenceReport/1.0 (local trade lead magnet)",
+        "User-Agent": "KalvezPresenceReport/1.0 (local trade lead magnet)",
         Accept: "application/json",
       },
     });

@@ -170,7 +170,7 @@ function servicePhrasesForTrade(trade: ReportTrade) {
 }
 
 /**
- * Spread limited SerpAPI checks across the service area:
+ * Spread limited Places keyword checks across the service area:
  * primary phrase in home + surrounding towns, then secondary phrases in home town.
  */
 export function keywordsForServiceArea(

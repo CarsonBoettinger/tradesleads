@@ -127,8 +127,13 @@ const MONTHLY_MISS_CAP: Record<ReportTrade, { low: number; high: number }> = {
   "Another trade": { low: 1, high: 5 },
 };
 
+function hasOrganicRanks(keywords: KeywordRank[]) {
+  return keywords.some((k) => k.organicPosition != null);
+}
+
 function missedJobsFromKeywords(keywords: KeywordRank[]) {
   // Conservative local demand model (jobs/month across the keyword set).
+  const includeOrganic = hasOrganicRanks(keywords);
   let missed = 0;
   for (const k of keywords) {
     if (k.mapPackPosition == null) missed += 0.45;
@@ -136,6 +141,7 @@ function missedJobsFromKeywords(keywords: KeywordRank[]) {
     else if (k.mapPackPosition === 3) missed += 0.25;
     else if (k.mapPackPosition > 3) missed += 0.35;
 
+    if (!includeOrganic) continue;
     if (k.organicPosition == null) missed += 0.2;
     else if (k.organicPosition > 10) missed += 0.15;
     else if (k.organicPosition > 3) missed += 0.08;
@@ -213,9 +219,13 @@ export function buildScoreCard(input: {
   web: WebSignals;
   reviews: ReviewItem[];
 }): ScoreCard {
-  const search = clamp(
-    mapPackScore(input.keywords) * 0.65 + organicScore(input.keywords) * 0.35,
-  );
+  // Live reports use Places local ranking only; organic is optional (demo/legacy).
+  const search = hasOrganicRanks(input.keywords)
+    ? clamp(
+        mapPackScore(input.keywords) * 0.65 +
+          organicScore(input.keywords) * 0.35,
+      )
+    : clamp(mapPackScore(input.keywords));
   const web = webExperienceScore(input.web);
   const listings = listingsScore(
     input.place,

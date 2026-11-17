@@ -46,16 +46,16 @@ export async function generateMetadata({
     ],
     alternates: { canonical: absoluteUrl(tradeHref(trade.slug)) },
     openGraph: {
-      title: `${title} | FOREMAN`,
+      title: `${title} | Kalvez`,
       description,
       type: "website",
       locale: "en_US",
-      siteName: "FOREMAN",
+      siteName: "Kalvez",
       url: absoluteUrl(tradeHref(trade.slug)),
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} | FOREMAN`,
+      title: `${title} | Kalvez`,
       description,
     },
   };
@@ -180,7 +180,7 @@ export default async function TradePage({ params }: PageProps) {
 
         <section className="py-20 sm:py-28">
           <Container>
-            <Eyebrow>What Foreman does</Eyebrow>
+            <Eyebrow>What Kalvez does</Eyebrow>
             <h2 className="mt-4 max-w-3xl text-[2.25rem] leading-[1.05] font-extrabold tracking-[-0.02em] text-balance text-cocoa sm:text-5xl">
               Built for {trade.name.toLowerCase()} who want more booked work
             </h2>

@@ -1,10 +1,10 @@
-# FOREMAN Brand Guidelines (Agent Reference)
+# Kalvez Brand Guidelines (Agent Reference)
 
-Use this file as the source of truth when writing copy, designing pages, or producing any asset for FOREMAN. If a request conflicts with it, follow the request and flag the conflict.
+Use this file as the source of truth when writing copy, designing pages, or producing any asset for Kalvez. If a request conflicts with it, follow the request and flag the conflict.
 
 ## 1. Who we are
 
-- **Name:** FOREMAN (always uppercase in the wordmark; "Foreman" in running text)
+- **Name:** Kalvez (product / site: kalvez.com). Title case in the wordmark and running text.
 - **Descriptor:** Growth for the trades
 - **Primary line:** Built to get you found.
 - **Boilerplate:** Websites and local search growth for the businesses that build our world.
@@ -46,7 +46,7 @@ Soft, warm and roomy. Rounded corners, generous spacing, orange used sparingly. 
 
 | Name | Hex | Use |
 | --- | --- | --- |
-| Foreman Orange | `#C2410C` | Logo, primary buttons, key links. Cream text on it only |
+| Kalvez Orange | `#C2410C` | Logo, primary buttons, key links. Cream text on it only |
 | Sunrise | `#F58A3C` | Accents and fills. Cocoa text on it only |
 | Peach | `#FFE9D6` | Cards, chips, soft sections |
 | Cream | `#FFF8F1` | Page background |
@@ -65,20 +65,20 @@ Rules:
 - **Headlines:** 800 weight, sentence case, tight tracking (-0.02em), line height about 1.05.
 - **Body:** 400 or 500 weight, 17 to 22px, line height 1.5 to 1.6.
 - **Small labels:** 700 weight, uppercase, wide tracking (0.14 to 0.2em), 14 to 16px.
-- **Wordmark only:** FOREMAN in 800 weight, uppercase, 0.06em tracking.
+- **Wordmark only:** Kalvez in 800 weight, uppercase, 0.06em tracking.
 
 ### Shape and layout
 
 - Cards: 20 to 32px radius, Peach fill or white with a 2px Peach border.
-- Buttons: pill shape (fully rounded), 52px tall, Foreman Orange fill, cream text, 700 weight.
+- Buttons: pill shape (fully rounded), 52px tall, Kalvez Orange fill, cream text, 700 weight.
 - Chips: pill, Peach fill, 700 weight.
 - Generous padding (28 to 36px in cards). One idea per section.
 - Touch targets at least 44px.
 
 ### Logo
 
-- **Mark:** Rounded square tile (12/48 radius) in Foreman Orange with two stacked upward chevrons in Cream. The chevrons are a foreman's rank stripes and a climb to the top spot.
-- **Lockup:** Mark followed by the FOREMAN wordmark, gap about 0.3x mark width.
+- **Mark:** Rounded square tile (12/48 radius) in Kalvez Orange with two stacked upward chevrons in Cream. The chevrons suggest climb and rank: a climb to the top spot.
+- **Lockup:** Mark followed by the Kalvez wordmark, gap about 0.3x mark width.
 - **Clear space:** One chevron height on all sides.
 - **Do not:** recolour, stretch, add shadows or outlines, or place on busy images.
 
@@ -116,10 +116,10 @@ SVG for the mark:
 
 ## 5. Before external launch
 
-"Foreman" is a common dictionary word. Before investing further in the brand, check:
+Primary site: **kalvez.com**. Before investing further in the brand, check:
 
-1. Domain availability, including close variants.
-2. Existing businesses operating as Foreman, especially in construction software and trades marketing.
+1. Close domain variants and social handles.
+2. Existing businesses operating as Kalvez, especially in construction software and trades marketing.
 3. Trademark conflicts in the relevant classes and jurisdictions.
 
 Do not claim ownership of the name or present it as registered until this is cleared.

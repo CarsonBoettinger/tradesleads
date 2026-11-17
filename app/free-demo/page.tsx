@@ -13,11 +13,11 @@ export const metadata: Metadata = {
   description,
   alternates: { canonical: absoluteUrl("/free-demo") },
   openGraph: {
-    title: "Book a free demo | FOREMAN",
+    title: "Book a free demo | Kalvez",
     description,
     type: "website",
     locale: "en_US",
-    siteName: "FOREMAN",
+    siteName: "Kalvez",
     url: absoluteUrl("/free-demo"),
   },
 };

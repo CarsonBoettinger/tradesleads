@@ -90,7 +90,7 @@ async function generateWithOpenAI(topic: BlogTopic): Promise<string | null> {
   if (!apiKey) return null;
 
   const model = process.env.OPENAI_BLOG_MODEL ?? "gpt-4.1-mini";
-  const system = `You write blog posts for FOREMAN, which helps trade businesses (plumbers, roofers, electricians, HVAC, builders, landscapers) get found online and get more booked jobs.
+  const system = `You write blog posts for Kalvez (kalvez.com), which helps trade businesses (plumbers, roofers, electricians, HVAC, builders, landscapers) get found online and get more booked jobs.
 
 Tone model: useful owner tips like SpotHopper’s restaurant marketing blog - practical, scannable, problem-solving. Teach something an owner can do this week.
 
@@ -170,7 +170,7 @@ export async function generateBlogPost(options?: {
     trade: topic.trade,
     primary_keyword: topic.primaryKeyword,
     secondary_keywords: topic.secondaryKeywords,
-    meta_title: `${topic.title} | FOREMAN`,
+    meta_title: `${topic.title} | Kalvez`,
     meta_description: excerpt,
     status: "published",
     source: "agent",

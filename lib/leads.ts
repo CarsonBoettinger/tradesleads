@@ -1,3 +1,12 @@
+import {
+  nationalPhoneDigits,
+  normalizeEmail,
+  parseEmail,
+  parsePhone,
+} from "@/lib/contact";
+import { getSupabaseAdmin } from "@/lib/supabase";
+import type { PresenceReportRow, ScorePayload } from "@/lib/report/types";
+
 export type DemoLeadInput = {
   firstName: string;
   lastName: string;
@@ -91,12 +100,15 @@ export function parseDemoLead(body: unknown):
 
   if (!data.firstName) return { ok: false, error: "First name is required." };
   if (!data.lastName) return { ok: false, error: "Last name is required." };
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-    return { ok: false, error: "A valid email is required." };
-  }
-  if (data.phone.replace(/\D/g, "").length < 7) {
-    return { ok: false, error: "A valid phone number is required." };
-  }
+
+  const emailParsed = parseEmail(data.email);
+  if (!emailParsed.ok) return { ok: false, error: emailParsed.error };
+  data.email = emailParsed.email;
+
+  const phoneParsed = parsePhone(data.phone);
+  if (!phoneParsed.ok) return { ok: false, error: phoneParsed.error };
+  data.phone = phoneParsed.phone;
+
   if (!data.business) return { ok: false, error: "Business name is required." };
   if (!data.town) return { ok: false, error: "Town is required." };
   if (!trades.has(data.trade)) return { ok: false, error: "Choose a trade." };
@@ -129,5 +141,106 @@ export function toLeadRow(data: DemoLeadInput): DemoLeadRow {
     channel: "free_demo",
     place_id: null,
     report_id: null,
+  };
+}
+
+export type LeadMatch = {
+  id: string;
+  email: string;
+  phone: string;
+  place_id: string | null;
+  report_id: string | null;
+  business: string;
+};
+
+function phoneMatches(stored: string, digits: string) {
+  return nationalPhoneDigits(stored) === digits;
+}
+
+/** Find an existing lead by email, preferring same place / phone when possible. */
+export async function findExistingLead(input: {
+  email: string;
+  phoneDigits: string;
+  placeId?: string | null;
+}): Promise<LeadMatch | null> {
+  const supabase = getSupabaseAdmin();
+  const email = normalizeEmail(input.email);
+
+  const { data, error } = await supabase
+    .from("leads")
+    .select("id, email, phone, place_id, report_id, business, created_at")
+    .ilike("email", email)
+    .order("created_at", { ascending: false })
+    .limit(25);
+
+  if (error) {
+    console.error("Lead duplicate lookup failed:", error);
+    return null;
+  }
+
+  const rows = (data ?? []) as Array<LeadMatch & { created_at: string }>;
+  if (!rows.length) return null;
+
+  if (input.placeId) {
+    const samePlace = rows.find((row) => row.place_id === input.placeId);
+    if (samePlace) return samePlace;
+  }
+
+  const samePhone = rows.find((row) =>
+    phoneMatches(row.phone, input.phoneDigits),
+  );
+  if (samePhone) return samePhone;
+
+  return rows[0] ?? null;
+}
+
+/** Load the best existing scored report for a lead / place. */
+export async function findExistingReportForLead(input: {
+  leadId: string;
+  placeId?: string | null;
+  reportId?: string | null;
+}): Promise<{
+  report: PresenceReportRow;
+  scorePayload: ScorePayload;
+} | null> {
+  const supabase = getSupabaseAdmin();
+
+  if (input.reportId) {
+    const { data } = await supabase
+      .from("presence_reports")
+      .select("*")
+      .eq("id", input.reportId)
+      .maybeSingle();
+    const row = data as PresenceReportRow | null;
+    if (row?.score_payload) {
+      return { report: row, scorePayload: row.score_payload as ScorePayload };
+    }
+  }
+
+  const { data, error } = await supabase
+    .from("presence_reports")
+    .select("*")
+    .eq("lead_id", input.leadId)
+    .not("score_payload", "is", null)
+    .in("status", ["ready", "unlocked"])
+    .order("updated_at", { ascending: false })
+    .limit(10);
+
+  if (error) {
+    console.error("Existing report lookup failed:", error);
+    return null;
+  }
+
+  const rows = (data ?? []) as PresenceReportRow[];
+  const preferred =
+    (input.placeId
+      ? rows.find((row) => row.place_id === input.placeId)
+      : null) ??
+    rows[0] ??
+    null;
+  if (!preferred?.score_payload) return null;
+  return {
+    report: preferred,
+    scorePayload: preferred.score_payload as ScorePayload,
   };
 }

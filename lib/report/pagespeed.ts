@@ -79,7 +79,7 @@ async function inspectHtmlChecks(input: {
       signal: AbortSignal.timeout(8000),
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (compatible; ForemanReportBot/1.0; +https://foreman.local)",
+          "Mozilla/5.0 (compatible; KalvezReportBot/1.0; +https://kalvez.com)",
         Accept: "text/html,application/xhtml+xml",
       },
     });

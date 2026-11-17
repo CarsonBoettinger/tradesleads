@@ -1,6 +1,6 @@
 # Daily blog agent
 
-Publishes one FOREMAN tip article per day to Supabase `public.posts` (`/blog`).
+Publishes one Kalvez tip article per day to Supabase `public.posts` (`/blog`).
 
 ## Editorial model
 
@@ -8,7 +8,7 @@ Write like [SpotHopper’s restaurant blog](https://www.spothopperapp.com/blog):
 
 - Lead with a real problem (not showing up on Google, visits but no calls, missed phones, slow season).
 - Teach one clear fix path an owner can use this week.
-- Keep voice plain and trade-smart (`docs/brand/FOREMAN-brand.md`).
+- Keep voice plain and trade-smart (`docs/brand/Kalvez-brand.md`).
 - Keywords stay in the background; helpfulness comes first.
 
 Topic bank: `lib/blog/topics.ts`.

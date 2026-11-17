@@ -1,5 +1,5 @@
 import {
-  serpKeywordLimit,
+  reportKeywordLimit,
   shouldUseReportDemoData,
 } from "@/lib/report/config";
 import {
@@ -20,7 +20,10 @@ import {
 } from "@/lib/report/places";
 import { scanWebsite } from "@/lib/report/pagespeed";
 import { buildScoreCard, buildTeaser } from "@/lib/report/scoring";
-import { rankKeywords, serpConfigured } from "@/lib/report/serp";
+import {
+  localSearchConfigured,
+  rankKeywords,
+} from "@/lib/report/keyword-rank";
 import {
   SERVICE_AREA_MILES,
   resolveServiceAreaTowns,
@@ -138,7 +141,7 @@ export async function runPresenceReport(reportId: string) {
       competitorAddresses: competitors.map((c) => c.address),
     });
 
-    const keywordLimit = serpKeywordLimit();
+    const keywordLimit = reportKeywordLimit();
     const tradeKeywords = keywordsForServiceArea(
       activeTrade,
       serviceTowns,
@@ -274,18 +277,18 @@ export async function runPresenceReport(reportId: string) {
           inMapPack: index === 0,
         }));
       }
-    } else if (serpConfigured()) {
+    } else if (localSearchConfigured()) {
       try {
         keywords = await rankKeywords({
           keywords: keywordList,
           businessName: place.name,
-          website: place.website,
+          placeId: place.placeId,
           lat: place.lat,
           lng: place.lng,
           limit: keywordLimit,
         });
       } catch (err) {
-        console.error("SERP ranking failed:", err);
+        console.error("Local keyword ranking failed:", err);
       }
     }
 

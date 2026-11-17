@@ -239,7 +239,7 @@ export function ReportFlow() {
 
           {demoMode && process.env.NODE_ENV !== "production" ? (
             <p className="mt-3 text-sm text-muted">
-              Demo data mode - add Places and SerpAPI keys for live results.
+              Demo data mode - add a Google Places API key for live results.
             </p>
           ) : null}
         </section>
