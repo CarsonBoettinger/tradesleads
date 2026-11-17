@@ -7,10 +7,10 @@ import { demoCta, demoHref, primaryButtonClass } from "@/components/ui";
 
 const links = [
   { href: "/#found", label: "Get found" },
-  { href: "/#remembered", label: "Stay in mind" },
-  { href: "/#booked", label: "Booked jobs" },
   { href: "/#how", label: "How it works" },
+  { href: "/trades", label: "Trades" },
   { href: "/blog", label: "Blog" },
+  { href: "/report", label: "Free report" },
 ];
 
 export function SiteHeader() {

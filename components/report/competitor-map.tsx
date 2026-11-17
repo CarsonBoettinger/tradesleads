@@ -146,7 +146,7 @@ export function CompetitorMap({
       className: "report-map-marker",
       html: markerHtml({
         label: "You",
-        color: "#c2410c",
+        color: "#ef7230",
         yours: true,
       }),
       iconSize: [0, 0],

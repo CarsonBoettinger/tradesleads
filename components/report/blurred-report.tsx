@@ -55,7 +55,7 @@ export function BlurredReport({
       </div>
 
       <div className="absolute inset-0 flex items-center justify-center bg-cream/55 px-4 py-8 backdrop-blur-[2px]">
-        <div className="w-full max-w-xl rounded-[12px] border-2 border-peach bg-white p-5 shadow-[0_18px_50px_rgba(42,35,32,0.16)] sm:p-7">
+        <div className="w-full max-w-xl rounded-[12px] border-2 border-peach bg-white p-5 shadow-[0_18px_50px_rgba(22,42,74,0.16)] sm:p-7">
           <GateForm compact onUnlock={onUnlock} />
         </div>
       </div>

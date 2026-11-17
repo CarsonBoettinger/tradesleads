@@ -1,3 +1,5 @@
+import "server-only";
+
 import { cacheTag } from "next/cache";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import type { BlogPost, BlogPostInput } from "./types";

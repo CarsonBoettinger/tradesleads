@@ -13,9 +13,18 @@ import {
   reportCta,
   reportHref,
 } from "@/components/ui";
-import { breadcrumbJsonLd } from "@/lib/seo";
-import { absoluteUrl } from "@/lib/site";
-import { getTradeBySlug, tradeHref, trades } from "@/lib/trades";
+import {
+  breadcrumbJsonLd,
+  buildPageMetadata,
+  tradeServiceJsonLd,
+  webPageJsonLd,
+} from "@/lib/seo";
+import {
+  getRelatedTrades,
+  getTradeBySlug,
+  tradeHref,
+  trades,
+} from "@/lib/trades";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -35,30 +44,26 @@ export async function generateMetadata({
   const title = `Local growth for ${trade.name}`;
   const description = trade.description;
 
-  return {
+  return buildPageMetadata({
     title,
     description,
+    path: tradeHref(trade.slug),
     keywords: [
       `${trade.name} marketing`,
       `${trade.singular} website`,
       `local SEO for ${trade.name}`,
       trade.searchExample,
+      `Google Business Profile for ${trade.name}`,
     ],
-    alternates: { canonical: absoluteUrl(tradeHref(trade.slug)) },
-    openGraph: {
-      title: `${title} | Kalvez`,
-      description,
-      type: "website",
-      locale: "en_US",
-      siteName: "Kalvez",
-      url: absoluteUrl(tradeHref(trade.slug)),
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${title} | Kalvez`,
-      description,
-    },
-  };
+    images: [
+      {
+        url: `${tradeHref(trade.slug)}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: `Local growth for ${trade.name}`,
+      },
+    ],
+  });
 }
 
 export default async function TradePage({ params }: PageProps) {
@@ -66,13 +71,22 @@ export default async function TradePage({ params }: PageProps) {
   const trade = getTradeBySlug(slug);
   if (!trade) notFound();
 
-  const otherTrades = trades.filter((item) => item.slug !== trade.slug);
+  const otherTrades = getRelatedTrades(trade.slug, 8);
 
   return (
     <div>
       <JsonLd
+        data={webPageJsonLd({
+          name: `Local growth for ${trade.name}`,
+          description: trade.description,
+          path: tradeHref(trade.slug),
+        })}
+      />
+      <JsonLd data={tradeServiceJsonLd(trade)} />
+      <JsonLd
         data={breadcrumbJsonLd([
           { name: "Home", path: "/" },
+          { name: "Trades", path: "/trades" },
           { name: trade.name, path: tradeHref(trade.slug) },
         ])}
       />
@@ -213,7 +227,7 @@ export default async function TradePage({ params }: PageProps) {
               >
                 Get found. Get hired.
               </h2>
-              <p className="mx-auto mt-5 max-w-xl text-[18px] leading-[1.6] text-[#eadfd6]">
+              <p className="mx-auto mt-5 max-w-xl text-[18px] leading-[1.6] text-[#c5d0e0]">
                 Tell us you are {trade.article} {trade.singular} and the town
                 you serve. The demo takes 20 minutes.
               </p>
@@ -228,7 +242,7 @@ export default async function TradePage({ params }: PageProps) {
           <Container>
             <Eyebrow>Other trades</Eyebrow>
             <h2 className="mt-4 max-w-3xl text-[2.25rem] leading-[1.05] font-extrabold tracking-[-0.02em] text-balance text-cocoa sm:text-5xl">
-              Growth for the crews that build our world
+              Related trades we help grow
             </h2>
             <ul className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {otherTrades.map((item) => (
@@ -241,6 +255,14 @@ export default async function TradePage({ params }: PageProps) {
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link
+                  href="/trades"
+                  className="flex min-h-14 items-center rounded-xl border-2 border-cocoa bg-cocoa px-5 text-[17px] font-bold text-cream transition-colors hover:bg-foreman focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreman"
+                >
+                  Browse all trades
+                </Link>
+              </li>
             </ul>
           </Container>
         </section>

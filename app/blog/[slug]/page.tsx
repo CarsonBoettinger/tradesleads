@@ -7,8 +7,11 @@ import { SiteHeader } from "@/components/site-header";
 import { Container, Eyebrow, demoHref, primaryButtonClass } from "@/components/ui";
 import { Markdown } from "@/lib/blog/markdown";
 import { getPublishedPostBySlug, listPublishedPosts } from "@/lib/blog/posts";
-import { blogPostingJsonLd, breadcrumbJsonLd } from "@/lib/seo";
-import { absoluteUrl } from "@/lib/site";
+import {
+  blogPostingJsonLd,
+  breadcrumbJsonLd,
+  buildPageMetadata,
+} from "@/lib/seo";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -33,28 +36,27 @@ export async function generateMetadata({
   const title = post.meta_title ?? post.title;
   const description = post.meta_description ?? post.excerpt;
 
-  return {
+  return buildPageMetadata({
     title,
     description,
+    path: `/blog/${post.slug}`,
+    type: "article",
+    publishedTime: post.published_at ?? undefined,
+    modifiedTime: post.updated_at,
     keywords: [
       post.primary_keyword,
       ...(post.secondary_keywords ?? []),
+      post.trade,
     ].filter(Boolean) as string[],
-    alternates: { canonical: absoluteUrl(`/blog/${post.slug}`) },
-    openGraph: {
-      title,
-      description,
-      type: "article",
-      url: absoluteUrl(`/blog/${post.slug}`),
-      publishedTime: post.published_at ?? undefined,
-      modifiedTime: post.updated_at,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-    },
-  };
+    images: [
+      {
+        url: `/blog/${post.slug}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: title,
+      },
+    ],
+  });
 }
 
 function formatDate(value: string | null) {

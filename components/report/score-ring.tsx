@@ -9,7 +9,7 @@ const TONE_COLOR = {
   good: "#0d9488",
   ok: "#d97706",
   bad: "#dc2626",
-  empty: "#d6c4b5",
+  empty: "#9aa8bc",
 } as const;
 
 export function ScoreRing({
@@ -43,7 +43,7 @@ export function ScoreRing({
             cy={box / 2}
             r={radius}
             fill="none"
-            stroke="#f3e7db"
+            stroke="#e8eef6"
             strokeWidth={stroke}
           />
           <circle

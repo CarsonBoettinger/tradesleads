@@ -1,11 +1,14 @@
+import "server-only";
+
 import {
   nationalPhoneDigits,
   normalizeEmail,
   parseEmail,
   parsePhone,
 } from "@/lib/contact";
-import { getSupabaseAdmin } from "@/lib/supabase";
+import { REPORT_TRADES } from "@/lib/report/keywords";
 import type { PresenceReportRow, ScorePayload } from "@/lib/report/types";
+import { getSupabaseAdmin } from "@/lib/supabase";
 
 export type DemoLeadInput = {
   firstName: string;
@@ -53,15 +56,7 @@ export type DemoLeadRow = {
   report_id: string | null;
 };
 
-const trades = new Set([
-  "Plumber",
-  "Roofer",
-  "Electrician",
-  "HVAC",
-  "Builder",
-  "Landscaper",
-  "Another trade",
-]);
+const trades = new Set<string>(REPORT_TRADES);
 
 const times = new Set(["Morning", "Afternoon", "Evening"]);
 

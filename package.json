@@ -2,19 +2,23 @@
   "name": "tradesleads",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "blog:generate": "curl -sS -H \"Authorization: Bearer $CRON_SECRET\" \"${SITE_URL:-http://localhost:3000}/api/cron/daily-blog\""
+    "blog:generate": "node --env-file=.env.local scripts/blog-generate.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.109.0",
     "leaflet": "^1.9.4",
     "next": "16.4.6",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "4.3.3",

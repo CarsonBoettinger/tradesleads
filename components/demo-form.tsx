@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { formatPhone, parseEmail, parsePhone } from "@/lib/contact";
 import { demoCta, primaryButtonClass } from "@/components/ui";
+import { REPORT_TRADES } from "@/lib/report/keywords";
 
 type FieldName =
   | "firstName"
@@ -33,15 +34,7 @@ const empty: FormState = {
   consent: "",
 };
 
-const trades = [
-  "Plumber",
-  "Roofer",
-  "Electrician",
-  "HVAC",
-  "Builder",
-  "Landscaper",
-  "Another trade",
-];
+const trades = REPORT_TRADES;
 
 const times = ["Morning", "Afternoon", "Evening"];
 

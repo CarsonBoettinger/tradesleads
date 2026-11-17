@@ -1,37 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kalvez / tradesleads
+
+Next.js app for Kalvez lead capture, free reports, and the daily blog agent.
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
+cp .env.example .env.local
+# fill in values from .env.example
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deploy on Netlify
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Next.js 16 runs on Netlify with the OpenNext adapter (applied automatically — do not pin `@netlify/plugin-nextjs`).
 
-## Learn More
+1. Push this repo and [add a new site from Git](https://app.netlify.com/start) in Netlify.
+2. Build settings are in `netlify.toml` (`npm run build`, publish `.next`, Node 20).
+3. In **Project configuration → Environment variables**, set at least:
 
-To learn more about Next.js, take a look at the following resources:
+| Variable | Notes |
+| --- | --- |
+| `NEXT_PUBLIC_SITE_URL` | Canonical site URL only (safe in the browser) |
+| `SUPABASE_URL` | Supabase project URL (**server-only**, not `NEXT_PUBLIC_`) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server writes (**secret**, never `NEXT_PUBLIC_`) |
+| `BLOG_AGENT_TOKEN` | Must match `public.app_settings.blog_agent_token` |
+| `CRON_SECRET` | Auth for scheduled daily blog job |
+| `GOOGLE_PLACES_API_KEY` | Required for `/report` in production |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Do **not** prefix secrets with `NEXT_PUBLIC_`. Forms and reports call `/api/*` routes; keys stay on the server.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Optional: `OPENAI_API_KEY`, `OPENAI_BLOG_MODEL`, `PAGESPEED_API_KEY`, `REPORT_KEYWORD_LIMIT`. Keep Telegram tokens in Supabase Vault, not Netlify.
 
-## Deploy on Vercel
+4. Deploy. The daily blog job is `netlify/functions/daily-blog` on schedule `0 13 * * *` UTC (calls `/api/cron/daily-blog`).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Manual blog trigger:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# tradesleads
+```bash
+curl -sS -H "Authorization: Bearer $CRON_SECRET" \
+  "https://YOUR_DOMAIN/api/cron/daily-blog"
+```
+
+See `.env.example` and `docs/agents/daily-blog.md` for more.

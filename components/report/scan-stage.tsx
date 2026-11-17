@@ -318,9 +318,9 @@ export function ScanStage({
       {act === "web" ? (
         <div className="relative overflow-hidden rounded-[12px] border-2 border-peach bg-white">
           <div className="flex items-center gap-2 border-b-2 border-peach bg-cream px-4 py-3">
-            <span className="size-2.5 rounded-full bg-[#E5C7B0]" />
-            <span className="size-2.5 rounded-full bg-[#E5C7B0]" />
-            <span className="size-2.5 rounded-full bg-[#E5C7B0]" />
+            <span className="size-2.5 rounded-full bg-[#9aa8bc]" />
+            <span className="size-2.5 rounded-full bg-[#9aa8bc]" />
+            <span className="size-2.5 rounded-full bg-[#9aa8bc]" />
             <div className="ml-2 flex-1 truncate rounded-md bg-white px-3 py-1 text-sm text-muted">
               {siteUrl ??
                 (webBeat === "loading"
@@ -357,7 +357,7 @@ export function ScanStage({
                 </div>
               )}
               {webBeat === "scanning" ? (
-                <div className="website-scan pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent,rgba(194,65,12,0.14),transparent)]" />
+                <div className="website-scan pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent,rgba(239,114,48,0.14),transparent)]" />
               ) : null}
               {webBeat === "loading" && siteUrl ? (
                 <div className="absolute inset-0 grid place-items-center bg-cream/70">

@@ -194,7 +194,7 @@ export function BusinessAutocomplete({
         <div
           id={listId}
           role="listbox"
-          className="absolute z-30 mt-1 max-h-72 w-full overflow-auto rounded-[10px] border-2 border-peach bg-white shadow-[0_12px_30px_rgba(42,35,32,0.12)]"
+          className="absolute z-30 mt-1 max-h-72 w-full overflow-auto rounded-[10px] border-2 border-peach bg-white shadow-[0_12px_30px_rgba(22,42,74,0.12)]"
         >
           {loading && !suggestions.length ? (
             <p className="px-4 py-3 text-base text-muted">Searching…</p>

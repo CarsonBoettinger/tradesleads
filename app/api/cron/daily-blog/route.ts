@@ -15,8 +15,12 @@ function authorized(request: Request) {
   if (cronSecret && candidates.includes(cronSecret)) return true;
   if (agentToken && candidates.includes(agentToken)) return true;
 
-  // Vercel Cron sends Authorization: Bearer <CRON_SECRET> when configured.
-  if (process.env.VERCEL === "1" && !cronSecret && !agentToken) {
+  // Hosted cron (Vercel Cron / Netlify scheduled function) must send a secret.
+  if (
+    (process.env.VERCEL === "1" || process.env.NETLIFY === "true") &&
+    !cronSecret &&
+    !agentToken
+  ) {
     return false;
   }
 

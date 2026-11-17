@@ -1,3 +1,5 @@
+import "server-only";
+
 import { placesConfigured, searchTextRanked } from "@/lib/report/places";
 import { SERVICE_AREA_METERS } from "@/lib/report/service-area";
 import type { KeywordRank } from "@/lib/report/types";

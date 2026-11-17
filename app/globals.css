@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --foreman-orange: #c2410c;
-  --sunrise: #f58a3c;
-  --peach: #ffe9d6;
-  --cream: #fff8f1;
-  --cocoa: #2a2320;
-  --text-secondary: #5f524a;
+  --foreman-orange: #ef7230;
+  --sunrise: #f59a5a;
+  --peach: #e8eef6;
+  --cream: #f5f7fb;
+  --cocoa: #162a4a;
+  --text-secondary: #5a6b82;
   --radius-card: 12px;
   --radius-control: 10px;
   --font: "Plus Jakarta Sans", system-ui, sans-serif;
@@ -54,78 +54,70 @@ body {
 }
 
 .select-field {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%232A2320' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%23162A4A' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 1.15rem center;
 }
 
-.note-loop {
+.hero-outcome {
+  animation: hero-outcome-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-feed-card {
+  animation: hero-feed-card-in 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+
+.hero-feed-row {
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(12px);
 }
 
-.note-loop-1 {
-  animation: note-1 9s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+.hero-feed-row-1 {
+  animation: hero-feed-row-in 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both;
 }
 
-.note-loop-2 {
-  animation: note-2 9s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+.hero-feed-row-2 {
+  animation: hero-feed-row-in 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.62s both;
 }
 
-.note-loop-3 {
-  animation: note-3 9s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+.hero-feed-row-3 {
+  animation: hero-feed-row-in 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.79s both;
 }
 
-@keyframes note-1 {
-  0% {
+.hero-feed-row-4 {
+  animation: hero-feed-row-in 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.96s both;
+}
+
+@keyframes hero-outcome-in {
+  from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(18px) scale(0.985);
   }
-  6%,
-  72% {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes hero-feed-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
     opacity: 1;
     transform: translateY(0);
   }
-  82%,
-  100% {
-    opacity: 0;
-    transform: translateY(10px);
-  }
 }
 
-@keyframes note-2 {
-  0%,
-  14% {
+@keyframes hero-feed-row-in {
+  from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(12px);
   }
-  20%,
-  72% {
+  to {
     opacity: 1;
     transform: translateY(0);
-  }
-  82%,
-  100% {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-}
-
-@keyframes note-3 {
-  0%,
-  28% {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  34%,
-  72% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  82%,
-  100% {
-    opacity: 0;
-    transform: translateY(10px);
   }
 }
 
@@ -170,7 +162,7 @@ body {
   align-items: center;
   transform: translate(-50%, -100%);
   animation: report-map-pin-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-  filter: drop-shadow(0 2px 4px rgba(28, 25, 23, 0.22));
+  filter: drop-shadow(0 2px 4px rgba(22, 42, 74, 0.22));
   pointer-events: none;
 }
 
@@ -194,7 +186,7 @@ body {
   margin-top: 4px;
   border-radius: 999px;
   border: 2px solid #fff;
-  box-shadow: 0 1px 2px rgba(28, 25, 23, 0.25);
+  box-shadow: 0 1px 2px rgba(22, 42, 74, 0.25);
 }
 
 @keyframes report-map-pin-pop {
@@ -218,7 +210,7 @@ body {
   background: linear-gradient(
     100deg,
     transparent 35%,
-    rgba(194, 65, 12, 0.12) 50%,
+    rgba(239, 114, 48, 0.12) 50%,
     transparent 65%
   );
   background-size: 220% 100%;
@@ -290,26 +282,54 @@ body {
   animation: toolbox-idle 2.4s ease-in-out infinite;
 }
 
+.feature-float {
+  animation: feature-float 5.5s ease-in-out infinite;
+}
+
+.feature-float-delayed {
+  animation: feature-float 5.5s ease-in-out 0.7s infinite;
+}
+
+.feature-float-late {
+  animation: feature-float 5.5s ease-in-out 1.4s infinite;
+}
+
+@keyframes feature-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
 
   .marquee-track,
-  .note-loop-1,
-  .note-loop-2,
-  .note-loop-3,
+  .hero-outcome,
+  .hero-feed-card,
+  .hero-feed-row-1,
+  .hero-feed-row-2,
+  .hero-feed-row-3,
+  .hero-feed-row-4,
   .scan-line,
   .website-scan,
   .competitor-pin,
   .report-map-pin,
   .review-card,
   .review-scan,
-  .toolbox-idle {
+  .toolbox-idle,
+  .feature-float,
+  .feature-float-delayed,
+  .feature-float-late {
     animation: none;
   }
 
-  .note-loop,
+  .hero-feed-row,
   .competitor-pin,
   .report-map-pin,
   .review-card {

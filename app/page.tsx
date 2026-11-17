@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/json-ld";
 import { Audit } from "@/components/landing/audit";
 import { Booked } from "@/components/landing/booked";
 import { Company } from "@/components/landing/company";
@@ -12,23 +13,29 @@ import { TradeStrip } from "@/components/landing/trade-strip";
 import { Trades } from "@/components/landing/trades";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { defaultTitle, siteDescriptor } from "@/lib/seo";
-import { absoluteUrl } from "@/lib/site";
+import {
+  buildPageMetadata,
+  defaultTitle,
+  siteDescriptor,
+  webPageJsonLd,
+} from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: { absolute: defaultTitle },
   description: siteDescriptor,
-  alternates: { canonical: absoluteUrl("/") },
-  openGraph: {
-    title: defaultTitle,
-    description: siteDescriptor,
-    url: absoluteUrl("/"),
-  },
-};
+  path: "/",
+});
 
 export default function Home() {
   return (
     <div id="top">
+      <JsonLd
+        data={webPageJsonLd({
+          name: defaultTitle,
+          description: siteDescriptor,
+          path: "/",
+        })}
+      />
       <SiteHeader />
       <main id="content">
         <Hero />

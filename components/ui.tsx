@@ -7,7 +7,7 @@ export const reportCta = "Get my free report";
 export const reportHref = "/report";
 
 export const primaryButtonClass =
-  "inline-flex h-[52px] cursor-pointer items-center justify-center rounded-[10px] bg-foreman px-6 text-center text-[17px] font-bold whitespace-nowrap text-cream transition-colors hover:bg-[#9a3412] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreman";
+  "inline-flex h-[52px] cursor-pointer items-center justify-center rounded-[10px] bg-foreman px-6 text-center text-[17px] font-bold whitespace-nowrap text-cream transition-colors hover:bg-[#d15f20] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreman";
 
 export const ghostButtonClass =
   "inline-flex h-[52px] cursor-pointer items-center justify-center rounded-[10px] border-2 border-peach bg-white px-6 text-center text-[17px] font-bold text-cocoa transition-colors hover:bg-peach focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreman";

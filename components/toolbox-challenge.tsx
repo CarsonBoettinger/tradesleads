@@ -51,12 +51,12 @@ function ToolIcon({ kind, className = "" }: { kind: ToolKind; className?: string
     case "hammer":
       return (
         <svg {...common}>
-          <rect x="21" y="18" width="6" height="24" rx="2" fill="#5f524a" />
+          <rect x="21" y="18" width="6" height="24" rx="2" fill="#5a6b82" />
           <path
             d="M10 14c0-3 2.5-6 8-6h12c5.5 0 8 3 8 6v4H10v-4Z"
-            fill="#c2410c"
+            fill="#ef7230"
           />
-          <path d="M12 16h24v3H12z" fill="#9a3412" />
+          <path d="M12 16h24v3H12z" fill="#d15f20" />
         </svg>
       );
     case "wrench":
@@ -64,28 +64,28 @@ function ToolIcon({ kind, className = "" }: { kind: ToolKind; className?: string
         <svg {...common}>
           <path
             d="M18 8a8 8 0 0 1 10.5 7.5L42 29.5 36.5 35 23 21.5A8 8 0 1 1 18 8Zm2.5 5.5a3 3 0 1 0 0-0.1Z"
-            fill="#c2410c"
+            fill="#ef7230"
           />
-          <circle cx="18" cy="14" r="3.25" fill="#fff8f1" />
+          <circle cx="18" cy="14" r="3.25" fill="#f5f7fb" />
         </svg>
       );
     case "screwdriver":
       return (
         <svg {...common}>
-          <path d="M22 6h4l2 8h-8l2-8Z" fill="#c2410c" />
-          <rect x="21.5" y="14" width="5" height="22" rx="1.5" fill="#5f524a" />
-          <path d="M21.5 36h5l-1.5 6h-2l-1.5-6Z" fill="#2a2320" />
+          <path d="M22 6h4l2 8h-8l2-8Z" fill="#ef7230" />
+          <rect x="21.5" y="14" width="5" height="22" rx="1.5" fill="#5a6b82" />
+          <path d="M21.5 36h5l-1.5 6h-2l-1.5-6Z" fill="#162a4a" />
         </svg>
       );
     case "tape":
       return (
         <svg {...common}>
-          <circle cx="24" cy="24" r="14" fill="#c2410c" />
-          <circle cx="24" cy="24" r="7" fill="#fff8f1" />
-          <circle cx="24" cy="24" r="3" fill="#2a2320" />
+          <circle cx="24" cy="24" r="14" fill="#ef7230" />
+          <circle cx="24" cy="24" r="7" fill="#f5f7fb" />
+          <circle cx="24" cy="24" r="3" fill="#162a4a" />
           <path
             d="M24 10v4M24 34v4M10 24h4M34 24h4"
-            stroke="#ffe9d6"
+            stroke="#e8eef6"
             strokeWidth="2"
             strokeLinecap="round"
           />
@@ -96,15 +96,15 @@ function ToolIcon({ kind, className = "" }: { kind: ToolKind; className?: string
         <svg {...common}>
           <path
             d="M16 8c2 4 4 8 6 12l4-4c-2-4-4-8-6-12-2.2 1-3.5 2.5-4 4Z"
-            fill="#5f524a"
+            fill="#5a6b82"
           />
           <path
             d="M32 8c-2 4-4 8-6 12l-4-4c2-4 4-8 6-12 2.2 1 3.5 2.5 4 4Z"
-            fill="#5f524a"
+            fill="#5a6b82"
           />
           <path
             d="M20 22c1.5 2 3 4 4 6 1-2 2.5-4 4-6l-2 18h-4l-2-18Z"
-            fill="#c2410c"
+            fill="#ef7230"
           />
         </svg>
       );
@@ -131,12 +131,12 @@ function Toolbox({
       aria-hidden="true"
     >
       <svg viewBox="0 0 96 56" className="h-auto w-full">
-        <rect x="8" y="18" width="80" height="32" rx="6" fill="#c2410c" />
-        <rect x="12" y="22" width="72" height="10" rx="2" fill="#9a3412" />
-        <rect x="36" y="8" width="24" height="14" rx="4" fill="#9a3412" />
-        <rect x="40" y="11" width="16" height="6" rx="2" fill="#ffe9d6" />
-        <rect x="18" y="36" width="18" height="8" rx="2" fill="#ffe9d6" />
-        <rect x="60" y="36" width="18" height="8" rx="2" fill="#ffe9d6" />
+        <rect x="8" y="18" width="80" height="32" rx="6" fill="#ef7230" />
+        <rect x="12" y="22" width="72" height="10" rx="2" fill="#d15f20" />
+        <rect x="36" y="8" width="24" height="14" rx="4" fill="#d15f20" />
+        <rect x="40" y="11" width="16" height="6" rx="2" fill="#e8eef6" />
+        <rect x="18" y="36" width="18" height="8" rx="2" fill="#e8eef6" />
+        <rect x="60" y="36" width="18" height="8" rx="2" fill="#e8eef6" />
       </svg>
     </div>
   );

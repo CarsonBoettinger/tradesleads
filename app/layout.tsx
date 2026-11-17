@@ -33,12 +33,16 @@ export const metadata: Metadata = {
     "Google Business Profile for contractors",
     "trade business websites",
     "contractor website that gets calls",
+    "local SEO for trades",
   ],
   authors: [{ name: siteName }],
   creator: siteName,
   publisher: siteName,
-  alternates: {
-    canonical: "/",
+  category: "business",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
   },
   openGraph: {
     title: defaultTitle,
@@ -47,11 +51,27 @@ export const metadata: Metadata = {
     locale: "en_US",
     siteName,
     url: "/",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Kalvez - Built to get you found",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: defaultTitle,
     description: siteDescriptor,
+    images: ["/opengraph-image"],
+  },
+  icons: {
+    icon: [
+      { url: "/icon.png", type: "image/png" },
+      { url: "/brand/kalvez-icon.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [{ url: "/apple-icon.png" }],
   },
   robots: {
     index: true,
@@ -64,11 +84,16 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
+  other: {
+    "geo.region": "US",
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#FFF8F1",
+  themeColor: "#162A4A",
   colorScheme: "light",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

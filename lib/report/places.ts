@@ -1,3 +1,5 @@
+import "server-only";
+
 import { competitorQueriesForTrade } from "@/lib/report/keywords";
 import {
   SERVICE_AREA_METERS,
@@ -18,6 +20,12 @@ const NEARBY_TYPES: Partial<Record<ReportTrade, string[]>> = {
   Plumber: ["plumber"],
   Roofer: ["roofing_contractor"],
   Electrician: ["electrician"],
+  Painter: ["painter"],
+  Locksmith: ["locksmith"],
+  Moving: ["moving_company"],
+  "Auto repair": ["car_repair"],
+  "Auto detailing": ["car_wash"],
+  Towing: ["tow_truck_agency"],
 };
 
 /** Used to drop obvious non-trade results after search. */
@@ -246,8 +254,18 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceDetails> {
   };
 }
 
-function isJunkPlace(place: PlaceCandidate) {
-  return place.types.some((type) => JUNK_TYPES.has(type));
+/** Types that are peers for a trade and should not be treated as junk. */
+const TRADE_ALLOWED_TYPES: Partial<Record<ReportTrade, string[]>> = {
+  "Auto repair": ["car_repair", "car_dealer"],
+  "Auto detailing": ["car_wash", "car_repair"],
+  Towing: ["tow_truck_agency", "car_repair"],
+};
+
+function isJunkPlace(place: PlaceCandidate, trade?: ReportTrade) {
+  const allowed = new Set(TRADE_ALLOWED_TYPES[trade ?? "Another trade"] ?? []);
+  return place.types.some(
+    (type) => JUNK_TYPES.has(type) && !allowed.has(type),
+  );
 }
 
 function competitorScore(place: PlaceCandidate) {
@@ -373,7 +391,7 @@ export async function findNearbyCompetitors(input: {
     .filter((p) => {
       if (!p.placeId || p.placeId === input.excludePlaceId) return false;
       if (seen.has(p.placeId)) return false;
-      if (isJunkPlace(p)) return false;
+      if (isJunkPlace(p, input.trade)) return false;
       if (p.lat != null && p.lng != null) {
         if (milesBetween(origin, { lat: p.lat, lng: p.lng }) > SERVICE_AREA_MILES) {
           return false;

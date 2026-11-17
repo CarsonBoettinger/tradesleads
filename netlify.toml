@@ -1,0 +1,19 @@
+# Next.js on Netlify: OpenNext adapter is applied automatically (do not pin @netlify/plugin-nextjs).
+# https://docs.netlify.com/frameworks/next-js/overview/
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+  # Ensure Next public env is available at build time for metadata/canonicals.
+  # Set the rest in Netlify UI → Environment variables (see .env.example).
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Replaces vercel.json cron: hit the Next.js route so revalidatePath/Tag work.
+[functions."daily-blog"]
+  schedule = "0 13 * * *"

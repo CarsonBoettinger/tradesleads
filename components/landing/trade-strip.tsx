@@ -3,8 +3,12 @@ const trades = [
   "Roofing",
   "Electrical",
   "HVAC",
-  "Building",
+  "General contracting",
   "Landscaping",
+  "Pressure washing",
+  "Auto repair",
+  "Welding",
+  "Tree service",
 ];
 
 export function TradeStrip() {

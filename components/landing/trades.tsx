@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Container, Eyebrow } from "@/components/ui";
-import { tradeHref, trades } from "@/lib/trades";
+import { featuredTrades, tradeHref } from "@/lib/trades";
 
 export function Trades() {
   return (
@@ -14,7 +14,7 @@ export function Trades() {
           Busy, practical, and tired of agencies that talk past the work.
         </p>
         <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {trades.map((trade) => (
+          {featuredTrades.map((trade) => (
             <li key={trade.slug}>
               <Link
                 href={tradeHref(trade.slug)}
@@ -30,6 +30,14 @@ export function Trades() {
             </li>
           ))}
         </ul>
+        <p className="mt-10">
+          <Link
+            href="/trades"
+            className="inline-flex min-h-11 items-center text-[17px] font-bold text-cocoa underline decoration-peach underline-offset-4 hover:decoration-foreman focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreman"
+          >
+            See every trade we support
+          </Link>
+        </p>
       </Container>
     </section>
   );

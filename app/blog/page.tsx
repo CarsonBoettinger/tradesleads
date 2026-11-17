@@ -5,20 +5,34 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Container, Eyebrow, demoHref, primaryButtonClass } from "@/components/ui";
 import { listPublishedPosts } from "@/lib/blog/posts";
-import { breadcrumbJsonLd } from "@/lib/seo";
-import { absoluteUrl } from "@/lib/site";
+import {
+  breadcrumbJsonLd,
+  buildPageMetadata,
+  itemListJsonLd,
+  webPageJsonLd,
+} from "@/lib/seo";
+
+const title = "Blog";
+const description =
+  "Quick marketing and local-search tips for trade owners who can’t afford to lose another customer - Google, websites, reviews, and getting calls.";
 
 export const metadata: Metadata = {
-  title: "Blog",
-  description:
-    "Quick marketing and local-search tips for trade owners who can’t afford to lose another customer - Google, websites, reviews, and getting calls.",
-  alternates: { canonical: absoluteUrl("/blog") },
-  openGraph: {
-    title: "Blog | Kalvez",
-    description:
-      "Useful tips for plumbers, roofers, electricians, HVAC, builders, and landscapers.",
-    url: absoluteUrl("/blog"),
-    type: "website",
+  ...buildPageMetadata({
+    title,
+    description,
+    path: "/blog",
+    keywords: [
+      "trade business blog",
+      "local SEO tips for contractors",
+      "Google Business Profile tips",
+      "plumber marketing tips",
+    ],
+  }),
+  alternates: {
+    canonical: "/blog",
+    types: {
+      "application/rss+xml": [{ url: "/feed.xml", title: "Kalvez Blog" }],
+    },
   },
 };
 
@@ -37,11 +51,30 @@ export default async function BlogIndexPage() {
   return (
     <div>
       <JsonLd
+        data={webPageJsonLd({
+          name: title,
+          description,
+          path: "/blog",
+          type: "CollectionPage",
+        })}
+      />
+      <JsonLd
         data={breadcrumbJsonLd([
           { name: "Home", path: "/" },
           { name: "Blog", path: "/blog" },
         ])}
       />
+      {posts.length ? (
+        <JsonLd
+          data={itemListJsonLd(
+            "Kalvez blog articles",
+            posts.map((post) => ({
+              name: post.title,
+              path: `/blog/${post.slug}`,
+            })),
+          )}
+        />
+      ) : null}
       <SiteHeader />
       <main id="content" className="py-14 sm:py-20">
         <Container>

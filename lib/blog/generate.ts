@@ -1,3 +1,5 @@
+import "server-only";
+
 import { BLOG_TOPICS, pickTopicForDay, topicById } from "./topics";
 import type { BlogPostInput, BlogTopic } from "./types";
 

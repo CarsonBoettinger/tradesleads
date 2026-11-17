@@ -1,3 +1,5 @@
+import "server-only";
+
 import type { WebsiteCheck, WebSignals } from "@/lib/report/types";
 
 function apiKey() {

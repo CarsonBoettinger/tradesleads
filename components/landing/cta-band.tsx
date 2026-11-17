@@ -11,7 +11,7 @@ export function CtaBand() {
           >
             Get found. Get hired.
           </h2>
-          <p className="mx-auto mt-5 max-w-xl text-[18px] leading-[1.6] text-[#eadfd6]">
+          <p className="mx-auto mt-5 max-w-xl text-[18px] leading-[1.6] text-[#c5d0e0]">
             Tell us the trade and the town. The demo takes 20 minutes.
           </p>
           <div className="mt-8">

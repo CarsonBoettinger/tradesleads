@@ -11,7 +11,7 @@ const points = [
   },
   {
     title: "Built for independent crews",
-    body: "Plumbers, roofers, electricians, HVAC, builders, and landscapers. Not a franchise template.",
+    body: "Plumbers, roofers, electricians, HVAC, contractors, landscapers, and dozens more trades. Not a franchise template.",
   },
 ];
 
@@ -28,7 +28,7 @@ export function Company() {
         >
           A real company for the trades
         </h2>
-        <p className="mt-5 max-w-2xl text-[18px] leading-[1.6] text-[#eadfd6] sm:text-[19px]">
+        <p className="mt-5 max-w-2xl text-[18px] leading-[1.6] text-[#c5d0e0] sm:text-[19px]">
           Not an agency. Not a tech startup. Websites and local search,
           explained the way you would explain a job.
         </p>
@@ -38,7 +38,7 @@ export function Company() {
               <h3 className="text-2xl leading-tight font-extrabold tracking-[-0.02em]">
                 {point.title}
               </h3>
-              <p className="mt-3 text-[17px] leading-relaxed text-[#eadfd6]">
+              <p className="mt-3 text-[17px] leading-relaxed text-[#c5d0e0]">
                 {point.body}
               </p>
             </li>
