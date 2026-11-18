@@ -1,4 +1,4 @@
-import { clientIp, rateLimit } from "@/lib/report/rate-limit";
+import { enforceRateLimit } from "@/lib/http-guard";
 import { isUuid, safeEqual } from "@/lib/report/security";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import type {
@@ -8,26 +8,20 @@ import type {
 } from "@/lib/report/types";
 
 export async function GET(request: Request) {
-  const limited = rateLimit({
-    key: `report-status:${clientIp(request)}`,
+  const limited = enforceRateLimit({
+    request,
+    key: "report-status",
     limit: 120,
     windowMs: 60_000,
+    message: "Too many requests. Try again shortly.",
   });
-  if (!limited.ok) {
-    return Response.json(
-      { error: "Too many requests. Try again shortly." },
-      {
-        status: 429,
-        headers: { "Retry-After": String(limited.retryAfterSec) },
-      },
-    );
-  }
+  if (limited) return limited;
 
   const { searchParams } = new URL(request.url);
   const reportId = searchParams.get("reportId")?.trim() ?? "";
   const unlockToken = searchParams.get("token")?.trim() ?? "";
 
-  if (!isUuid(reportId) || unlockToken.length < 32) {
+  if (!isUuid(reportId) || unlockToken.length < 32 || unlockToken.length > 128) {
     return Response.json({ error: "Missing report credentials." }, { status: 400 });
   }
 

@@ -67,8 +67,8 @@ const sources = new Set([
   "Somewhere else",
 ]);
 
-function trim(value: unknown) {
-  return typeof value === "string" ? value.trim() : "";
+function trim(value: unknown, max = 160) {
+  return typeof value === "string" ? value.trim().slice(0, max) : "";
 }
 
 export function parseDemoLead(body: unknown):
@@ -80,16 +80,16 @@ export function parseDemoLead(body: unknown):
 
   const raw = body as Record<string, unknown>;
   const data: DemoLeadInput = {
-    firstName: trim(raw.firstName),
-    lastName: trim(raw.lastName),
-    email: trim(raw.email),
-    phone: trim(raw.phone),
-    business: trim(raw.business),
-    town: trim(raw.town),
-    trade: trim(raw.trade),
-    time: trim(raw.time),
-    source: trim(raw.source),
-    comments: trim(raw.comments),
+    firstName: trim(raw.firstName, 80),
+    lastName: trim(raw.lastName, 80),
+    email: trim(raw.email, 160),
+    phone: trim(raw.phone, 40),
+    business: trim(raw.business, 160),
+    town: trim(raw.town, 120),
+    trade: trim(raw.trade, 80),
+    time: trim(raw.time, 40),
+    source: trim(raw.source, 80),
+    comments: trim(raw.comments, 1_000),
     consent: raw.consent === true || raw.consent === "yes",
   };
 

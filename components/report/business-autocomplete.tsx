@@ -12,6 +12,11 @@ import type { PlaceCandidate } from "@/lib/report/types";
 const fieldClass =
   "mt-2 h-[52px] w-full rounded-[10px] border-2 border-peach bg-white px-4 text-[17px] text-cocoa outline-none transition-colors focus:border-foreman";
 
+/** Wait until typing pauses before calling Places (saves API cost). */
+const SEARCH_DEBOUNCE_MS = 550;
+/** If still no address-listed business after this idle window, offer demo. */
+const DEMO_FALLBACK_MS = 3000;
+
 function cityFromAddress(address: string) {
   const parts = address
     .split(",")
@@ -20,6 +25,23 @@ function cityFromAddress(address: string) {
   if (parts.length >= 3) return parts[parts.length - 3] ?? parts[1] ?? null;
   if (parts.length === 2) return parts[0] ?? null;
   return null;
+}
+
+function hasListedAddress(place: PlaceCandidate) {
+  return Boolean(place.address?.trim());
+}
+
+function buildDemoCandidate(name: string): PlaceCandidate {
+  return {
+    placeId: "demo-unlisted",
+    name,
+    address: "No address listed on Google",
+    lat: null,
+    lng: null,
+    rating: null,
+    reviewCount: null,
+    types: ["local_business"],
+  };
 }
 
 function HighlightMatch({ text, query }: { text: string; query: string }) {
@@ -63,6 +85,7 @@ export function BusinessAutocomplete({
   const [suggestions, setSuggestions] = useState<PlaceCandidate[]>([]);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [searched, setSearched] = useState(false);
+  const [showDemoFallback, setShowDemoFallback] = useState(false);
   const requestId = useRef(0);
 
   useEffect(() => {
@@ -78,27 +101,56 @@ export function BusinessAutocomplete({
 
   useEffect(() => {
     const query = value.trim();
+    let demoTimer: ReturnType<typeof setTimeout> | undefined;
 
     if (selected && selected.name === value) {
       setSuggestions([]);
       setOpen(false);
       setLoading(false);
       setSearched(false);
+      setShowDemoFallback(false);
       return;
     }
 
     if (query.length < 3) {
+      requestId.current += 1;
       setSuggestions([]);
       setOpen(false);
       setLoading(false);
       setSearched(false);
+      setShowDemoFallback(false);
       return;
     }
 
+    // Fake loading while the user is still typing — no Places call yet.
+    setLoading(true);
+    setOpen(true);
+    setShowDemoFallback(false);
+    setSearched(false);
+    setSuggestions([]);
+    setActiveIndex(-1);
+
+    const typedAt = Date.now();
     const currentRequest = ++requestId.current;
-    const timer = setTimeout(async () => {
-      setLoading(true);
+
+    function offerDemoIfStillCurrent() {
+      if (currentRequest !== requestId.current) return;
+      setShowDemoFallback(true);
       setOpen(true);
+      setLoading(false);
+    }
+
+    function scheduleDemoFallback() {
+      const remaining = DEMO_FALLBACK_MS - (Date.now() - typedAt);
+      if (remaining <= 0) {
+        offerDemoIfStillCurrent();
+        return;
+      }
+      // Keep the spinner up until the 3s idle window ends.
+      demoTimer = setTimeout(offerDemoIfStillCurrent, remaining);
+    }
+
+    const searchTimer = setTimeout(async () => {
       try {
         const response = await fetch("/api/report/search", {
           method: "POST",
@@ -110,29 +162,45 @@ export function BusinessAutocomplete({
         if (!response.ok) {
           setSuggestions([]);
           setSearched(true);
+          scheduleDemoFallback();
           return;
         }
-        setSuggestions((data.results as PlaceCandidate[]) ?? []);
+        const results = ((data.results as PlaceCandidate[]) ?? []).filter(
+          hasListedAddress,
+        );
+        setSuggestions(results);
         setSearched(true);
         setActiveIndex(-1);
+        if (results.length > 0) {
+          setLoading(false);
+          return;
+        }
+        scheduleDemoFallback();
       } catch {
         if (currentRequest !== requestId.current) return;
         setSuggestions([]);
         setSearched(true);
-      } finally {
-        if (currentRequest === requestId.current) setLoading(false);
+        scheduleDemoFallback();
       }
-    }, 300);
+    }, SEARCH_DEBOUNCE_MS);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(searchTimer);
+      if (demoTimer) clearTimeout(demoTimer);
+    };
   }, [value, selected]);
 
   function choose(place: PlaceCandidate) {
     onSelect(place);
     setOpen(false);
     setSuggestions([]);
+    setShowDemoFallback(false);
     setActiveIndex(-1);
   }
+
+  const demoCandidate = buildDemoCandidate(value.trim());
+  const optionCount =
+    suggestions.length + (showDemoFallback && !loading ? 1 : 0);
 
   function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
     if (!open) return;
@@ -140,14 +208,18 @@ export function BusinessAutocomplete({
     if (event.key === "ArrowDown") {
       event.preventDefault();
       setActiveIndex((index) =>
-        Math.min(index + 1, Math.max(suggestions.length - 1, 0)),
+        Math.min(index + 1, Math.max(optionCount - 1, 0)),
       );
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
       setActiveIndex((index) => Math.max(index - 1, -1));
-    } else if (event.key === "Enter" && activeIndex >= 0 && suggestions[activeIndex]) {
+    } else if (event.key === "Enter" && activeIndex >= 0) {
       event.preventDefault();
-      choose(suggestions[activeIndex]);
+      if (activeIndex < suggestions.length && suggestions[activeIndex]) {
+        choose(suggestions[activeIndex]);
+      } else if (showDemoFallback && !loading) {
+        choose(demoCandidate);
+      }
     } else if (event.key === "Escape") {
       setOpen(false);
       setActiveIndex(-1);
@@ -200,7 +272,10 @@ export function BusinessAutocomplete({
             <p className="px-4 py-3 text-base text-muted">Searching…</p>
           ) : null}
 
-          {!loading && searched && !suggestions.length ? (
+          {!loading &&
+          searched &&
+          !suggestions.length &&
+          !showDemoFallback ? (
             <p className="px-4 py-3 text-base text-muted">
               No matching businesses. Keep typing or include your town.
             </p>
@@ -234,6 +309,32 @@ export function BusinessAutocomplete({
               </button>
             );
           })}
+
+          {showDemoFallback && !loading ? (
+            <button
+              id={`${listId}-option-${suggestions.length}`}
+              type="button"
+              role="option"
+              aria-selected={activeIndex === suggestions.length}
+              className={`block w-full px-4 py-3 text-left ${
+                suggestions.length ? "border-t border-peach/70" : ""
+              } ${
+                activeIndex === suggestions.length
+                  ? "bg-peach"
+                  : "bg-white hover:bg-cream"
+              }`}
+              onMouseEnter={() => setActiveIndex(suggestions.length)}
+              onClick={() => choose(demoCandidate)}
+            >
+              <p className="text-[17px] font-bold text-cocoa">
+                See a sample report for {value.trim() || "your business"}
+              </p>
+              <p className="mt-0.5 text-sm text-muted">
+                We couldn’t find a Google listing with an address attached —
+                that alone costs calls. Try the demo report.
+              </p>
+            </button>
+          ) : null}
         </div>
       ) : null}
     </div>

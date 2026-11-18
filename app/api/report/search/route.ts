@@ -4,33 +4,30 @@ import {
 } from "@/lib/report/config";
 import { demoSearch } from "@/lib/report/demo-data";
 import { searchPlaces } from "@/lib/report/places";
-import { clientIp, rateLimit } from "@/lib/report/rate-limit";
+import {
+  enforceRateLimit,
+  readJsonBody,
+  rejectCrossOrigin,
+} from "@/lib/http-guard";
 import { clampText } from "@/lib/report/security";
 
 export async function POST(request: Request) {
-  const limited = rateLimit({
-    key: `report-search:${clientIp(request)}`,
+  const crossOrigin = rejectCrossOrigin(request);
+  if (crossOrigin) return crossOrigin;
+
+  const limited = enforceRateLimit({
+    request,
+    key: "report-search",
     limit: 30,
     windowMs: 60_000,
+    message: "Too many searches. Try again shortly.",
   });
-  if (!limited.ok) {
-    return Response.json(
-      { error: "Too many searches. Try again shortly." },
-      {
-        status: 429,
-        headers: { "Retry-After": String(limited.retryAfterSec) },
-      },
-    );
-  }
+  if (limited) return limited;
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return Response.json({ error: "Invalid JSON body." }, { status: 400 });
-  }
+  const parsedBody = await readJsonBody(request, 4_096);
+  if (!parsedBody.ok) return parsedBody.response;
 
-  const raw = (body ?? {}) as Record<string, unknown>;
+  const raw = (parsedBody.body ?? {}) as Record<string, unknown>;
   const query = clampText(
     typeof raw.query === "string" ? raw.query : "",
     120,

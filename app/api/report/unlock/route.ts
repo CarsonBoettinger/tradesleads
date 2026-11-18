@@ -1,10 +1,16 @@
 import { parseEmail, parsePhone } from "@/lib/contact";
 import {
+  enforceKeyedRateLimit,
+  enforceRateLimit,
+  honeypotTripped,
+  readJsonBody,
+  rejectCrossOrigin,
+} from "@/lib/http-guard";
+import {
   findExistingLead,
   findExistingReportForLead,
   LEAD_TAG_REPORT,
 } from "@/lib/leads";
-import { clientIp, rateLimit } from "@/lib/report/rate-limit";
 import { clampText, isUuid, safeEqual } from "@/lib/report/security";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import type { PresenceReportRow, ScorePayload } from "@/lib/report/types";
@@ -22,29 +28,34 @@ function scoreResponse(scorePayload: ScorePayload, reused = false) {
 }
 
 export async function POST(request: Request) {
-  const limited = rateLimit({
-    key: `report-unlock:${clientIp(request)}`,
+  const crossOrigin = rejectCrossOrigin(request);
+  if (crossOrigin) return crossOrigin;
+
+  const limited = enforceRateLimit({
+    request,
+    key: "report-unlock",
     limit: 10,
     windowMs: 60_000,
+    message: "Too many unlock attempts. Try again shortly.",
   });
-  if (!limited.ok) {
-    return Response.json(
-      { error: "Too many unlock attempts. Try again shortly." },
-      {
-        status: 429,
-        headers: { "Retry-After": String(limited.retryAfterSec) },
-      },
-    );
+  if (limited) return limited;
+
+  const parsedBody = await readJsonBody(request, 8_192);
+  if (!parsedBody.ok) return parsedBody.response;
+
+  if (honeypotTripped(parsedBody.body)) {
+    return Response.json({
+      ok: true,
+      unlocked: true,
+      reused: false,
+      score: null,
+      keywords: null,
+      web: null,
+      competitors: [],
+    });
   }
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return Response.json({ error: "Invalid JSON body." }, { status: 400 });
-  }
-
-  const raw = (body ?? {}) as Record<string, unknown>;
+  const raw = (parsedBody.body ?? {}) as Record<string, unknown>;
   const reportId = clampText(
     typeof raw.reportId === "string" ? raw.reportId : "",
     64,
@@ -95,6 +106,14 @@ export async function POST(request: Request) {
 
   const email = emailParsed.email;
   const phone = phoneParsed.phone;
+
+  const emailLimited = enforceKeyedRateLimit({
+    key: `report-unlock-email:${email}`,
+    limit: 5,
+    windowMs: 60 * 60_000,
+    message: "Too many unlock attempts for this email. Try again later.",
+  });
+  if (emailLimited) return emailLimited;
 
   try {
     const supabase = getSupabaseAdmin();

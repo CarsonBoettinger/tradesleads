@@ -150,6 +150,7 @@ export function ReportFlow() {
     email: string;
     phone: string;
     consent: boolean;
+    website?: string;
   }) {
     if (!reportId || !unlockToken) {
       throw new Error("Missing report session.");

@@ -1,20 +1,47 @@
 import { findExistingLead, parseDemoLead, toLeadRow } from "@/lib/leads";
 import { nationalPhoneDigits } from "@/lib/contact";
+import {
+  enforceKeyedRateLimit,
+  enforceRateLimit,
+  honeypotTripped,
+  readJsonBody,
+  rejectCrossOrigin,
+} from "@/lib/http-guard";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: Request) {
-  let body: unknown;
+  const crossOrigin = rejectCrossOrigin(request);
+  if (crossOrigin) return crossOrigin;
 
-  try {
-    body = await request.json();
-  } catch {
-    return Response.json({ error: "Invalid JSON body." }, { status: 400 });
+  const limited = enforceRateLimit({
+    request,
+    key: "demo",
+    limit: 5,
+    windowMs: 15 * 60_000,
+    message: "Too many demo requests. Try again later.",
+  });
+  if (limited) return limited;
+
+  const parsedBody = await readJsonBody(request, 16_384);
+  if (!parsedBody.ok) return parsedBody.response;
+
+  // Bots that fill the honeypot get a quiet success — no DB write / Telegram.
+  if (honeypotTripped(parsedBody.body)) {
+    return Response.json({ ok: true, duplicate: false });
   }
 
-  const parsed = parseDemoLead(body);
+  const parsed = parseDemoLead(parsedBody.body);
   if (!parsed.ok) {
     return Response.json({ error: parsed.error }, { status: 400 });
   }
+
+  const emailLimited = enforceKeyedRateLimit({
+    key: `demo-email:${parsed.data.email}`,
+    limit: 3,
+    windowMs: 60 * 60_000,
+    message: "Too many demo requests for this email. Try again later.",
+  });
+  if (emailLimited) return emailLimited;
 
   try {
     const supabase = getSupabaseAdmin();

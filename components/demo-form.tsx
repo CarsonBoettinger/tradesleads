@@ -72,6 +72,7 @@ export function DemoForm() {
   const successRef = useRef<HTMLHeadingElement>(null);
   const [values, setValues] = useState<FormState>(empty);
   const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({});
+  const [honeypot, setHoneypot] = useState("");
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -112,6 +113,7 @@ export function DemoForm() {
         body: JSON.stringify({
           ...normalized,
           consent: normalized.consent === "yes",
+          website: honeypot,
         }),
       });
 
@@ -155,12 +157,28 @@ export function DemoForm() {
   const errorList = Object.values(errors).filter(Boolean);
 
   return (
-    <form onSubmit={onSubmit} noValidate className="grid gap-5">
+    <form onSubmit={onSubmit} noValidate className="relative grid gap-5">
       <div>
         <h2 className="text-3xl leading-[1.05] font-extrabold tracking-[-0.02em] text-cocoa">
           Book a free demo
         </h2>
         <p className="mt-2 text-[17px] text-muted">It takes 20 minutes.</p>
+      </div>
+      {/* Honeypot: leave empty. Hidden from users, catches naive bots. */}
+      <div
+        aria-hidden="true"
+        className="absolute -left-[9999px] h-0 w-0 overflow-hidden opacity-0"
+      >
+        <label htmlFor={`${baseId}-website`}>Website</label>
+        <input
+          id={`${baseId}-website`}
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          value={honeypot}
+          onChange={(event) => setHoneypot(event.target.value)}
+        />
       </div>
       {errorList.length > 0 ? (
         <div

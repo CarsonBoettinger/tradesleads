@@ -4,8 +4,12 @@ import {
   missingReportProviderMessage,
   shouldUseReportDemoData,
 } from "@/lib/report/config";
+import {
+  enforceRateLimit,
+  readJsonBody,
+  rejectCrossOrigin,
+} from "@/lib/http-guard";
 import { inferTrade } from "@/lib/report/keywords";
-import { clientIp, rateLimit } from "@/lib/report/rate-limit";
 import { runPresenceReport } from "@/lib/report/run";
 import {
   clampText,
@@ -14,29 +18,22 @@ import {
 import { getSupabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: Request) {
-  const limited = rateLimit({
-    key: `report-start:${clientIp(request)}`,
+  const crossOrigin = rejectCrossOrigin(request);
+  if (crossOrigin) return crossOrigin;
+
+  const limited = enforceRateLimit({
+    request,
+    key: "report-start",
     limit: 8,
     windowMs: 60_000,
+    message: "Too many report scans. Try again shortly.",
   });
-  if (!limited.ok) {
-    return Response.json(
-      { error: "Too many report scans. Try again shortly." },
-      {
-        status: 429,
-        headers: { "Retry-After": String(limited.retryAfterSec) },
-      },
-    );
-  }
+  if (limited) return limited;
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return Response.json({ error: "Invalid JSON body." }, { status: 400 });
-  }
+  const parsedBody = await readJsonBody(request, 8_192);
+  if (!parsedBody.ok) return parsedBody.response;
 
-  const raw = (body ?? {}) as Record<string, unknown>;
+  const raw = (parsedBody.body ?? {}) as Record<string, unknown>;
   const placeId = clampText(
     typeof raw.placeId === "string" ? raw.placeId : "",
     256,
@@ -50,7 +47,10 @@ export async function POST(request: Request) {
     240,
   );
   const types = Array.isArray(raw.types)
-    ? raw.types.filter((item): item is string => typeof item === "string")
+    ? raw.types
+        .filter((item): item is string => typeof item === "string")
+        .slice(0, 20)
+        .map((item) => clampText(item, 64))
     : [];
   const trade = inferTrade({ types, name: businessName });
   const lat = typeof raw.lat === "number" && Number.isFinite(raw.lat) ? raw.lat : null;

@@ -18,12 +18,14 @@ export function GateForm({
     email: string;
     phone: string;
     consent: boolean;
+    website?: string;
   }) => Promise<void>;
 }) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [honeypot, setHoneypot] = useState("");
   const [consent, setConsent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,6 +56,7 @@ export function GateForm({
         email: emailParsed.email,
         phone: phoneParsed.phone,
         consent,
+        website: honeypot,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not unlock.");
@@ -79,7 +82,22 @@ export function GateForm({
         miss, competitor rank, and keyword rankings.
       </p>
 
-      <form className="mt-5 grid gap-3 sm:grid-cols-2" onSubmit={submit}>
+      <form className="relative mt-5 grid gap-3 sm:grid-cols-2" onSubmit={submit}>
+        <div
+          aria-hidden="true"
+          className="absolute -left-[9999px] h-0 w-0 overflow-hidden opacity-0"
+        >
+          <label htmlFor="report-website">Website</label>
+          <input
+            id="report-website"
+            name="website"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+          />
+        </div>
         <label className="block text-sm font-bold text-cocoa">
           First name
           <input

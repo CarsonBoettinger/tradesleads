@@ -1,8 +1,17 @@
+import { timingSafeEqual } from "node:crypto";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { generateBlogPost, topicIdFromKeywords } from "@/lib/blog/generate";
 import { listUsedTopicHints } from "@/lib/blog/posts";
 import { publishGeneratedPost } from "@/lib/blog/publish";
+import { enforceRateLimit } from "@/lib/http-guard";
+
+function secretsMatch(provided: string, expected: string) {
+  const left = Buffer.from(provided);
+  const right = Buffer.from(expected);
+  if (left.length !== right.length) return false;
+  return timingSafeEqual(left, right);
+}
 
 function authorized(request: Request) {
   const cronSecret = process.env.CRON_SECRET;
@@ -12,8 +21,10 @@ function authorized(request: Request) {
   const queryToken = new URL(request.url).searchParams.get("token");
 
   const candidates = [bearer, queryToken].filter(Boolean) as string[];
-  if (cronSecret && candidates.includes(cronSecret)) return true;
-  if (agentToken && candidates.includes(agentToken)) return true;
+  for (const candidate of candidates) {
+    if (cronSecret && secretsMatch(candidate, cronSecret)) return true;
+    if (agentToken && secretsMatch(candidate, agentToken)) return true;
+  }
 
   // Hosted cron (Vercel Cron / Netlify scheduled function) must send a secret.
   if (
@@ -27,10 +38,27 @@ function authorized(request: Request) {
   return false;
 }
 
-export async function GET(request: Request) {
+async function handle(request: Request) {
   if (!authorized(request)) {
+    const probeLimited = enforceRateLimit({
+      request,
+      key: "cron-auth-fail",
+      limit: 30,
+      windowMs: 15 * 60_000,
+      message: "Too many unauthorized attempts.",
+    });
+    if (probeLimited) return probeLimited;
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const limited = enforceRateLimit({
+    request,
+    key: "cron-daily-blog",
+    limit: 3,
+    windowMs: 60 * 60_000,
+    message: "Cron rate limit exceeded.",
+  });
+  if (limited) return limited;
 
   const agentToken = process.env.BLOG_AGENT_TOKEN;
   if (!agentToken) {
@@ -68,6 +96,10 @@ export async function GET(request: Request) {
   }
 }
 
+export async function GET(request: Request) {
+  return handle(request);
+}
+
 export async function POST(request: Request) {
-  return GET(request);
+  return handle(request);
 }

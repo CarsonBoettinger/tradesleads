@@ -16,32 +16,54 @@ type LeadRecord = {
   tags?: string[] | null;
 };
 
+const MAX_BODY_BYTES = 16_384;
+
 function leadHeadline(tags: string[] | null | undefined) {
   if (tags?.includes("report")) return "📊 Presence report lead - call them";
   if (tags?.includes("free demo")) return "📞 Free demo lead - call them";
   return "📞 Inbound lead - call them";
 }
 
+function clamp(value: string | null | undefined, max: number) {
+  if (!value) return "";
+  return value.trim().slice(0, max);
+}
+
 function formatMessage(lead: LeadRecord) {
   const lines = [
     leadHeadline(lead.tags),
     "",
-    `${lead.first_name ?? ""} ${lead.last_name ?? ""}`.trim(),
-    lead.business ?? "",
-    `${lead.trade ?? ""} · ${lead.town ?? ""}`,
+    `${clamp(lead.first_name, 80)} ${clamp(lead.last_name, 80)}`.trim(),
+    clamp(lead.business, 160),
+    `${clamp(lead.trade, 80)} · ${clamp(lead.town, 120)}`,
     "",
-    `📱 ${lead.phone ?? ""}`,
-    `✉️ ${lead.email ?? ""}`,
-    `🕐 Best time: ${lead.best_time ?? ""}`,
+    `📱 ${clamp(lead.phone, 40)}`,
+    `✉️ ${clamp(lead.email, 160)}`,
+    `🕐 Best time: ${clamp(lead.best_time, 40)}`,
   ];
 
-  if (lead.tags?.length) lines.push(`🏷️ Tag: ${lead.tags.join(", ")}`);
-  if (lead.source) lines.push(`🔎 Heard via: ${lead.source}`);
+  if (lead.tags?.length) {
+    lines.push(`🏷️ Tag: ${lead.tags.slice(0, 8).join(", ")}`);
+  }
+  if (lead.source) lines.push(`🔎 Heard via: ${clamp(lead.source, 80)}`);
   if (lead.comments) {
-    lines.push("", `Notes: ${lead.comments}`);
+    lines.push("", `Notes: ${clamp(lead.comments, 500)}`);
   }
 
   return lines.filter((line, index) => line !== "" || index === 1).join("\n");
+}
+
+function secretsMatch(provided: string | null, expected: string | undefined) {
+  if (!provided || !expected) return false;
+  const left = new TextEncoder().encode(provided);
+  const right = new TextEncoder().encode(expected);
+  if (left.length !== right.length) return false;
+
+  let diff = 0;
+  for (let i = 0; i < left.length; i += 1) {
+    diff |= left[i]! ^ right[i]!;
+  }
+  return diff === 0;
 }
 
 Deno.serve(async (req: Request) => {
@@ -52,9 +74,17 @@ Deno.serve(async (req: Request) => {
   const expectedSecret = Deno.env.get("LEAD_WEBHOOK_SECRET");
   const providedSecret = req.headers.get("x-webhook-secret");
 
-  if (!expectedSecret || providedSecret !== expectedSecret) {
+  if (!secretsMatch(providedSecret, expectedSecret)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const contentLength = Number(req.headers.get("content-length") ?? "0");
+  if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
+    return new Response(JSON.stringify({ error: "Payload too large" }), {
+      status: 413,
       headers: { "Content-Type": "application/json" },
     });
   }
@@ -69,9 +99,26 @@ Deno.serve(async (req: Request) => {
     );
   }
 
+  let text: string;
+  try {
+    text = await req.text();
+  } catch {
+    return new Response(JSON.stringify({ error: "Invalid body" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  if (text.length > MAX_BODY_BYTES) {
+    return new Response(JSON.stringify({ error: "Payload too large" }), {
+      status: 413,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   let payload: { record?: LeadRecord; type?: string };
   try {
-    payload = await req.json();
+    payload = JSON.parse(text) as { record?: LeadRecord; type?: string };
   } catch {
     return new Response(JSON.stringify({ error: "Invalid JSON" }), {
       status: 400,
