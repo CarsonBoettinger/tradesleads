@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
 import { formatPhone, parseEmail, parsePhone } from "@/lib/contact";
 import { primaryButtonClass } from "@/components/ui";
 
@@ -144,18 +145,36 @@ export function GateForm({
             required
           />
         </label>
-        <label className="sm:col-span-2 flex items-start gap-3 text-sm text-muted">
-          <input
-            type="checkbox"
-            className="mt-1 size-5 rounded border-2 border-peach"
-            checked={consent}
-            onChange={(e) => setConsent(e.target.checked)}
-          />
-          <span>
-            I agree Kalvez can contact me about this report and local growth
-            help.
-          </span>
-        </label>
+        <div className="sm:col-span-2">
+          <label className="flex items-start gap-3 text-sm text-muted">
+            <input
+              type="checkbox"
+              className="mt-1 size-5 rounded border-2 border-peach"
+              checked={consent}
+              onChange={(e) => setConsent(e.target.checked)}
+            />
+            <span>
+              I agree Kalvez can contact me about this report and local growth
+              help.
+            </span>
+          </label>
+          <p className="mt-2 pl-8 text-sm leading-relaxed text-muted">
+            <Link
+              href="/privacy"
+              className="font-bold text-cocoa underline decoration-peach underline-offset-4 hover:decoration-foreman focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreman"
+            >
+              Privacy Policy
+            </Link>{" "}
+            and{" "}
+            <Link
+              href="/terms"
+              className="font-bold text-cocoa underline decoration-peach underline-offset-4 hover:decoration-foreman focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreman"
+            >
+              Terms of Service
+            </Link>
+            .
+          </p>
+        </div>
         {error ? (
           <p className="sm:col-span-2 text-sm font-semibold text-foreman">
             {error}

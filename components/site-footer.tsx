@@ -68,9 +68,23 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-white/10">
-        <p className="mx-auto w-full max-w-6xl px-5 py-6 text-[15px] text-[#c5d0e0] sm:px-8">
-          © 2026 Kalvez
-        </p>
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-5 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+          <p className="text-[15px] text-[#c5d0e0]">© 2026 Kalvez</p>
+          <nav aria-label="Legal" className="flex gap-5">
+            <Link
+              href="/privacy"
+              className="inline-flex min-h-11 items-center text-[15px] font-bold text-cream underline decoration-transparent underline-offset-4 hover:decoration-cream focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
+            >
+              Privacy
+            </Link>
+            <Link
+              href="/terms"
+              className="inline-flex min-h-11 items-center text-[15px] font-bold text-cream underline decoration-transparent underline-offset-4 hover:decoration-cream focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
+            >
+              Terms
+            </Link>
+          </nav>
+        </div>
       </div>
     </footer>
   );

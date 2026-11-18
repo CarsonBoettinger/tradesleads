@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { formatPhone, parseEmail, parsePhone } from "@/lib/contact";
 import { demoCta, primaryButtonClass } from "@/components/ui";
 import { REPORT_TRADES } from "@/lib/report/keywords";
@@ -317,6 +318,22 @@ export function DemoForm() {
             {errors.consent}
           </p>
         ) : null}
+        <p className="mt-2 pl-8 text-[15px] leading-relaxed text-muted">
+          <Link
+            href="/privacy"
+            className="font-bold text-cocoa underline decoration-peach underline-offset-4 hover:decoration-foreman focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreman"
+          >
+            Privacy Policy
+          </Link>{" "}
+          and{" "}
+          <Link
+            href="/terms"
+            className="font-bold text-cocoa underline decoration-peach underline-offset-4 hover:decoration-foreman focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreman"
+          >
+            Terms of Service
+          </Link>
+          .
+        </p>
       </div>
       <div>
         <button

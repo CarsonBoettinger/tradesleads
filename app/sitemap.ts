@@ -42,6 +42,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 0.9,
     },
+    {
+      url: absoluteUrl("/privacy"),
+      lastModified: new Date("2026-11-17"),
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+    {
+      url: absoluteUrl("/terms"),
+      lastModified: new Date("2026-11-17"),
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
     ...trades.map((trade) => ({
       url: absoluteUrl(tradeHref(trade.slug)),
       lastModified: SITE_UPDATED_AT,
