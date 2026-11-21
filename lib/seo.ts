@@ -3,8 +3,10 @@ import { absoluteUrl, getSiteUrl } from "@/lib/site";
 
 export const siteName = "Kalvez";
 export const siteDescriptor =
-  "Websites and local search growth for the businesses that build our world.";
-export const defaultTitle = "Kalvez - Built to get you found";
+  "Kalvez is the AI platform for trades: better Google visibility, more local traffic, booked jobs, and customers who come back.";
+export const defaultTitle =
+  "Kalvez - AI that gets trade businesses more jobs from Google";
+export const siteSlogan = "More jobs from Google.";
 export const defaultOgImagePath = "/opengraph-image";
 
 const defaultKeywords = [
@@ -16,6 +18,10 @@ const defaultKeywords = [
   "trade business websites",
   "contractor website that gets calls",
   "local SEO for trades",
+  "AI for contractors",
+  "AI local SEO for trades",
+  "Google visibility for plumbers",
+  "get more jobs from Google",
 ];
 
 type PageMetadataInput = {
@@ -50,7 +56,7 @@ export function buildPageMetadata({
         url: defaultOgImagePath,
         width: 1200,
         height: 630,
-        alt: `${siteName} - Built to get you found`,
+        alt: defaultTitle,
       },
     ];
   const twitterImages = Array.isArray(resolvedImages)
@@ -119,14 +125,16 @@ export function organizationJsonLd() {
     },
     image: absoluteUrl("/brand/kalvez-logo.png"),
     description: siteDescriptor,
-    slogan: "Built to get you found.",
+    slogan: siteSlogan,
     foundingDate: "2025",
     areaServed: {
       "@type": "Country",
       name: "United States",
     },
     knowsAbout: [
+      "AI for contractors",
       "Local SEO",
+      "Google visibility for trades",
       "Trade business websites",
       "Google Business Profile",
       "Plumbing marketing",

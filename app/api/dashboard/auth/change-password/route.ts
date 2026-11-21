@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Sign in required." }, { status: 401 });
   }
 
-  const limited = enforceRateLimit({
+  const limited = await enforceRateLimit({
     request,
     key: `dashboard-change-password:${session.user.id}`,
     limit: 10,

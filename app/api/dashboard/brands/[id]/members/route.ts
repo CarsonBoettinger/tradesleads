@@ -1,6 +1,7 @@
 import { requireStaff } from "@/lib/auth/profile";
 import { assignClientToBrand, listBrandMembers } from "@/lib/sites/brands";
 import {
+  enforceKeyedRateLimit,
   enforceRateLimit,
   readJsonBody,
   rejectCrossOrigin,
@@ -28,13 +29,21 @@ export async function POST(request: Request, context: Ctx) {
     return Response.json({ error: "Staff only." }, { status: 403 });
   }
 
-  const limited = enforceRateLimit({
+  const limited = await enforceRateLimit({
     request,
     key: "dashboard-assign-client",
     limit: 20,
     windowMs: 60_000,
   });
   if (limited) return limited;
+
+  const userLimited = await enforceKeyedRateLimit({
+    key: `dashboard-assign-client-user:${staff.user.id}`,
+    limit: 30,
+    windowMs: 60 * 60_000,
+    message: "Hourly invite limit reached.",
+  });
+  if (userLimited) return userLimited;
 
   const { id } = await context.params;
   const parsedBody = await readJsonBody(request, 4_096);

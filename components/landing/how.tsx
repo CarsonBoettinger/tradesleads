@@ -8,13 +8,13 @@ const steps = [
   },
   {
     step: "02",
-    title: "A clear look at Google and your site",
-    body: "Where you show up today, and where the next customer is looking.",
+    title: "A clear look at your Google visibility",
+    body: "Where you show up today, how much traffic you get, and where the next customer is looking.",
   },
   {
     step: "03",
-    title: "A plan you can actually use",
-    body: "What to fix first so the right people can call you.",
+    title: "A plan that grows traffic and jobs",
+    body: "What to fix first so more of the right people find you, call you, and book the work.",
   },
 ];
 
@@ -24,7 +24,7 @@ export function How() {
       <Container>
         <Eyebrow>How it works</Eyebrow>
         <h2 className="mt-4 max-w-3xl text-[2.25rem] leading-[1.05] font-extrabold tracking-[-0.02em] text-balance text-cocoa sm:text-5xl">
-          From a search in your town to a phone call
+          From Google visibility to a booked job
         </h2>
         <ol className="mt-12 grid gap-4 lg:grid-cols-3">
           {steps.map((step) => (

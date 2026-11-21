@@ -8,8 +8,8 @@ const features = [
     title: "Rank higher on Google",
     body: (
       <>
-        Show up in <Accent>more local searches</Accent> for your trade in your
-        town.
+        Earn <Accent>more Google traffic</Accent> by showing up in more local
+        searches for your trade in your town.
       </>
     ),
   },
@@ -40,7 +40,7 @@ export function Found() {
     <div className="pt-14 sm:pt-20">
       <Container>
         <h2 className="mx-auto max-w-3xl text-center text-[1.75rem] leading-[1.15] font-extrabold tracking-[-0.03em] text-balance text-cocoa sm:text-[2.35rem]">
-          One platform to get found, stay known &amp; fill the week
+          One AI platform for Google visibility, traffic &amp; booked jobs
         </h2>
       </Container>
       <div className="mt-8 sm:mt-10">
@@ -48,7 +48,7 @@ export function Found() {
           id="found"
           eyebrow="Get the call"
           eyebrowIcon={<BarsIcon />}
-          title="Show up when someone is ready to hire"
+          title="Show up higher when someone is ready to hire"
           features={features}
           visual={<SearchRankVisual />}
         />

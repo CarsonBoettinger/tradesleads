@@ -1,5 +1,6 @@
 import { requireDashboardUser } from "@/lib/auth/profile";
 import { dashboardUrl } from "@/lib/hosts";
+import { enforceRateLimit } from "@/lib/http-guard";
 import { userCanAccessBrand } from "@/lib/sites/brands";
 import { upsertConnection } from "@/lib/social/connections";
 import {
@@ -20,6 +21,15 @@ function brandSocialRedirect(brandId: string, query: Record<string, string>) {
 }
 
 export async function GET(request: Request) {
+  const limited = await enforceRateLimit({
+    request,
+    key: "meta-oauth-callback",
+    limit: 30,
+    windowMs: 15 * 60_000,
+    message: "Too many OAuth attempts.",
+  });
+  if (limited) return limited;
+
   const session = await requireDashboardUser();
   if (!session) {
     return Response.redirect(dashboardUrl("/dashboard/login"), 302);

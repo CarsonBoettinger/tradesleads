@@ -1,20 +1,22 @@
 import {
+  enforceKeyedRateLimit,
   enforceRateLimit,
   readJsonBody,
   rejectCrossOrigin,
 } from "@/lib/http-guard";
 import { getBrandById, getBrandBySlug } from "@/lib/sites/brands";
+import { verifyTurnstile } from "@/lib/security/turnstile";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { parseEmail, parsePhone } from "@/lib/contact";
 
 export async function POST(request: Request) {
-  const crossOrigin = rejectCrossOrigin(request);
+  const crossOrigin = rejectCrossOrigin(request, { requireOrigin: true });
   if (crossOrigin) return crossOrigin;
 
-  const limited = enforceRateLimit({
+  const limited = await enforceRateLimit({
     request,
     key: "site-contact",
-    limit: 12,
+    limit: 5,
     windowMs: 60_000,
     message: "Too many messages. Try again shortly.",
   });
@@ -28,6 +30,12 @@ export async function POST(request: Request) {
   if (typeof raw.website === "string" && raw.website.trim()) {
     return Response.json({ ok: true });
   }
+
+  const turnstile = await verifyTurnstile({
+    token: raw.turnstileToken,
+    request,
+  });
+  if (!turnstile.ok) return turnstile.response;
 
   const brandId = typeof raw.brandId === "string" ? raw.brandId : "";
   const brandSlug = typeof raw.brandSlug === "string" ? raw.brandSlug : "";
@@ -49,6 +57,14 @@ export async function POST(request: Request) {
   const email = emailParsed.email;
   const phone =
     phoneParsed && phoneParsed.ok ? phoneParsed.phone : null;
+
+  const emailLimited = await enforceKeyedRateLimit({
+    key: `site-contact-email:${email}`,
+    limit: 10,
+    windowMs: 60 * 60_000,
+    message: "Too many messages from this email. Try again later.",
+  });
+  if (emailLimited) return emailLimited;
 
   const brand =
     (brandId ? await getBrandById(brandId) : null) ??

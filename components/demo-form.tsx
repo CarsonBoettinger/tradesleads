@@ -3,6 +3,10 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { formatPhone, parseEmail, parsePhone } from "@/lib/contact";
+import {
+  TurnstileWidget,
+  type TurnstileHandle,
+} from "@/components/security/turnstile-widget";
 import { demoCta, primaryButtonClass } from "@/components/ui";
 import { REPORT_TRADES } from "@/lib/report/keywords";
 
@@ -71,6 +75,7 @@ function validate(values: FormState) {
 export function DemoForm() {
   const baseId = useId();
   const successRef = useRef<HTMLHeadingElement>(null);
+  const turnstileRef = useRef<TurnstileHandle>(null);
   const [values, setValues] = useState<FormState>(empty);
   const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({});
   const [honeypot, setHoneypot] = useState("");
@@ -108,6 +113,15 @@ export function DemoForm() {
 
     setSubmitting(true);
     try {
+      const turnstileToken = (await turnstileRef.current?.getToken()) ?? "";
+      if (
+        process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() &&
+        !turnstileToken
+      ) {
+        setSubmitError("Complete the security check and try again.");
+        return;
+      }
+
       const response = await fetch("/api/demo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -115,6 +129,7 @@ export function DemoForm() {
           ...normalized,
           consent: normalized.consent === "yes",
           website: honeypot,
+          turnstileToken,
         }),
       });
 
@@ -123,6 +138,7 @@ export function DemoForm() {
       } | null;
 
       if (!response.ok) {
+        turnstileRef.current?.reset();
         setSubmitError(
           payload?.error ?? "Something went wrong. Please try again.",
         );
@@ -131,6 +147,7 @@ export function DemoForm() {
 
       setDone(true);
     } catch {
+      turnstileRef.current?.reset();
       setSubmitError("Could not reach the server. Check your connection.");
     } finally {
       setSubmitting(false);
@@ -335,6 +352,7 @@ export function DemoForm() {
           .
         </p>
       </div>
+      <TurnstileWidget ref={turnstileRef} className="min-h-[65px]" />
       <div>
         <button
           type="submit"

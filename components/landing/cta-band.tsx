@@ -9,10 +9,11 @@ export function CtaBand() {
             id="tagline-heading"
             className="text-[2.5rem] leading-[1.05] font-extrabold tracking-[-0.02em] text-balance text-cream sm:text-6xl"
           >
-            Get found. Get hired.
+            More visibility. More jobs.
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-[18px] leading-[1.6] text-[#c5d0e0]">
-            Tell us the trade and the town. The demo takes 20 minutes.
+            Tell us the trade and the town. In 20 minutes we cover your Google
+            visibility, traffic, and what it would take to book more work.
           </p>
           <div className="mt-8">
             <CtaLink href={demoHref}>{demoCta}</CtaLink>

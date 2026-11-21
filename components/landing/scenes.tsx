@@ -3,15 +3,15 @@ import { Container, Eyebrow } from "@/components/ui";
 const scenes = [
   {
     label: "After hours",
-    body: "A homeowner searches after dinner. Your business is the one they can call.",
+    body: "A homeowner searches after dinner. Better Google visibility means your business is the one they can call.",
   },
   {
     label: "On the tools",
-    body: "You are on a roof. The website answers the questions you cannot take right then.",
+    body: "You are on a roof. Local traffic still turns into quote requests while you finish the job.",
   },
   {
     label: "After the job",
-    body: "The work is done. The review ask goes out while it is still fresh.",
+    body: "The work is done. The review ask goes out while it is still fresh, so customers come back.",
   },
 ];
 

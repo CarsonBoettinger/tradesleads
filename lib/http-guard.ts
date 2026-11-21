@@ -47,11 +47,29 @@ function allowedOrigins(): Set<string> {
   return origins;
 }
 
-/** Reject cross-site POSTs; browsers send Origin on fetch from pages. */
-export function rejectCrossOrigin(request: Request): Response | null {
+function isSameSiteFetch(request: Request): boolean {
+  const site = request.headers.get("sec-fetch-site");
+  return site === "same-origin" || site === "same-site";
+}
+
+/**
+ * Reject cross-site POSTs.
+ * For browser-facing public writes (`requireOrigin: true` in production),
+ * missing Origin is only allowed when Sec-Fetch-Site is same-origin/same-site.
+ * Cron/internal Bearer routes should omit requireOrigin (default).
+ */
+export function rejectCrossOrigin(
+  request: Request,
+  options?: { requireOrigin?: boolean },
+): Response | null {
   const origin = request.headers.get("origin");
+  const requireOrigin =
+    options?.requireOrigin === true && process.env.NODE_ENV === "production";
+
   if (!origin) {
-    // Non-browser clients (curl, scripts) omit Origin — still rate-limited below.
+    if (requireOrigin && !isSameSiteFetch(request)) {
+      return Response.json({ error: "Forbidden." }, { status: 403 });
+    }
     return null;
   }
 
@@ -73,14 +91,14 @@ export function tooManyRequests(
   );
 }
 
-export function enforceRateLimit(input: {
+export async function enforceRateLimit(input: {
   request: Request;
   key: string;
   limit: number;
   windowMs: number;
   message?: string;
-}): Response | null {
-  const limited = rateLimit({
+}): Promise<Response | null> {
+  const limited = await rateLimit({
     key: `${input.key}:${clientIp(input.request)}`,
     limit: input.limit,
     windowMs: input.windowMs,
@@ -92,13 +110,13 @@ export function enforceRateLimit(input: {
   );
 }
 
-export function enforceKeyedRateLimit(input: {
+export async function enforceKeyedRateLimit(input: {
   key: string;
   limit: number;
   windowMs: number;
   message?: string;
-}): Response | null {
-  const limited = rateLimit({
+}): Promise<Response | null> {
+  const limited = await rateLimit({
     key: input.key,
     limit: input.limit,
     windowMs: input.windowMs,

@@ -12,12 +12,20 @@ type OAuthState = {
 };
 
 function secret() {
-  return (
+  const configured =
     process.env.SOCIAL_TOKEN_ENCRYPTION_KEY?.trim() ||
     process.env.CRON_SECRET?.trim() ||
-    process.env.META_APP_SECRET?.trim() ||
-    "dev-social-oauth"
-  );
+    process.env.META_APP_SECRET?.trim();
+
+  if (configured) return configured;
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "OAuth state secret missing. Set SOCIAL_TOKEN_ENCRYPTION_KEY (or CRON_SECRET / META_APP_SECRET).",
+    );
+  }
+
+  return "dev-social-oauth";
 }
 
 export function signOAuthState(payload: Omit<OAuthState, "exp">): string {

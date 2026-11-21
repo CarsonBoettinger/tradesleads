@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { HeroRotatingPhrase } from "@/components/landing/hero-rotating-phrase";
 import { CtaLink, Container, demoCta, demoHref } from "@/components/ui";
 
 const feed = [
@@ -46,15 +47,17 @@ export function Hero() {
         <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-12">
           <div>
             <p className="inline-flex rounded-lg bg-peach px-4 py-2 text-base font-bold text-cocoa">
-              Growth for the trades
+              Built for the trades
             </p>
-            <h1 className="mt-6 max-w-xl text-[2.75rem] leading-[1.05] font-extrabold tracking-[-0.02em] text-balance text-cocoa sm:text-6xl lg:text-7xl">
-              Built to get you found.
+            <h1 className="mt-6 max-w-2xl text-[2.35rem] leading-[1.08] font-extrabold tracking-[-0.02em] text-cocoa sm:text-5xl lg:text-6xl">
+              <span className="block">The AI platform for</span>
+              <HeroRotatingPhrase />
             </h1>
             <p className="mt-6 max-w-xl text-[19px] leading-[1.6] text-muted sm:text-[21px]">
-              Websites and local search growth for the businesses that build
-              our world. When someone in your town searches for the work, your
-              name is the one they can call.
+              Kalvez is the AI platform that grows your Google visibility,
+              brings in local traffic that turns into booked work, and brings
+              past customers back, so you stay on the tools while the right
+              people find you.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <CtaLink href={demoHref}>{demoCta}</CtaLink>
@@ -63,7 +66,8 @@ export function Hero() {
               </CtaLink>
             </div>
             <p className="mt-5 max-w-md text-[15px] leading-relaxed text-muted">
-              A 20-minute look at your website and how you show up on Google.
+              A 20-minute look at your Google visibility, traffic, and what it
+              would take to fill more of the week.
             </p>
           </div>
 

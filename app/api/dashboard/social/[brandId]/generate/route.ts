@@ -2,7 +2,11 @@ import { requireDashboardUser } from "@/lib/auth/profile";
 import { userCanAccessBrand } from "@/lib/sites/brands";
 import { generatePostsForBrand } from "@/lib/social/generate";
 import { listPostsForBrand } from "@/lib/social/posts";
-import { enforceRateLimit, rejectCrossOrigin } from "@/lib/http-guard";
+import {
+  enforceKeyedRateLimit,
+  enforceRateLimit,
+  rejectCrossOrigin,
+} from "@/lib/http-guard";
 
 type Ctx = { params: Promise<{ brandId: string }> };
 
@@ -23,7 +27,7 @@ export async function POST(request: Request, context: Ctx) {
     return Response.json({ error: "Forbidden." }, { status: 403 });
   }
 
-  const limited = enforceRateLimit({
+  const limited = await enforceRateLimit({
     request,
     key: "social-generate",
     limit: 6,
@@ -31,6 +35,14 @@ export async function POST(request: Request, context: Ctx) {
     message: "Generation rate limit exceeded.",
   });
   if (limited) return limited;
+
+  const userLimited = await enforceKeyedRateLimit({
+    key: `social-generate-user:${session.user.id}`,
+    limit: 6,
+    windowMs: 60 * 60_000,
+    message: "Hourly social generation limit reached.",
+  });
+  if (userLimited) return userLimited;
 
   try {
     const result = await generatePostsForBrand(brandId);

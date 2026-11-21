@@ -7,6 +7,7 @@ import {
   updatePost,
 } from "@/lib/social/posts";
 import {
+  enforceKeyedRateLimit,
   enforceRateLimit,
   readJsonBody,
   rejectCrossOrigin,
@@ -29,7 +30,7 @@ export async function PATCH(request: Request, context: Ctx) {
     return Response.json({ error: "Forbidden." }, { status: 403 });
   }
 
-  const limited = enforceRateLimit({
+  const limited = await enforceRateLimit({
     request,
     key: "social-post-patch",
     limit: 60,
@@ -93,6 +94,14 @@ export async function PATCH(request: Request, context: Ctx) {
   }
 
   if (body.action === "regenerate") {
+    const regenLimited = await enforceKeyedRateLimit({
+      key: `social-post-regen-user:${session.user.id}`,
+      limit: 10,
+      windowMs: 60 * 60_000,
+      message: "Hourly regenerate limit reached.",
+    });
+    if (regenLimited) return regenLimited;
+
     // Drop this draft and refill pipeline for one slot via generate pass.
     await deletePost(postId);
     const result = await generatePostsForBrand(brandId);

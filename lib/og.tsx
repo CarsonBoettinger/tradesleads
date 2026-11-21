@@ -103,7 +103,7 @@ export function renderOgImage({
             color: "#C5D0E0",
           }}
         >
-          <span>Built to get you found.</span>
+          <span>More jobs from Google.</span>
           <span style={{ color: "#EF7230", fontWeight: 700 }}>kalvez.com</span>
         </div>
       </div>

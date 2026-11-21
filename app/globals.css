@@ -130,6 +130,25 @@ body {
   }
 }
 
+@keyframes hero-phrase-pop {
+  from {
+    opacity: 0;
+    transform: translateY(0.45em) scale(0.92);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-0.06em) scale(1.03);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.hero-phrase-pop {
+  animation: hero-phrase-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 @keyframes marquee {
   to {
     transform: translateX(-50%);
@@ -325,6 +344,7 @@ body {
   .hero-feed-row-2,
   .hero-feed-row-3,
   .hero-feed-row-4,
+  .hero-phrase-pop,
   .scan-line,
   .website-scan,
   .competitor-pin,

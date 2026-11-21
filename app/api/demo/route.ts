@@ -7,13 +7,14 @@ import {
   readJsonBody,
   rejectCrossOrigin,
 } from "@/lib/http-guard";
+import { verifyTurnstile } from "@/lib/security/turnstile";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: Request) {
-  const crossOrigin = rejectCrossOrigin(request);
+  const crossOrigin = rejectCrossOrigin(request, { requireOrigin: true });
   if (crossOrigin) return crossOrigin;
 
-  const limited = enforceRateLimit({
+  const limited = await enforceRateLimit({
     request,
     key: "demo",
     limit: 5,
@@ -30,12 +31,19 @@ export async function POST(request: Request) {
     return Response.json({ ok: true, duplicate: false });
   }
 
+  const raw = (parsedBody.body ?? {}) as Record<string, unknown>;
+  const turnstile = await verifyTurnstile({
+    token: raw.turnstileToken,
+    request,
+  });
+  if (!turnstile.ok) return turnstile.response;
+
   const parsed = parseDemoLead(parsedBody.body);
   if (!parsed.ok) {
     return Response.json({ error: parsed.error }, { status: 400 });
   }
 
-  const emailLimited = enforceKeyedRateLimit({
+  const emailLimited = await enforceKeyedRateLimit({
     key: `demo-email:${parsed.data.email}`,
     limit: 3,
     windowMs: 60 * 60_000,

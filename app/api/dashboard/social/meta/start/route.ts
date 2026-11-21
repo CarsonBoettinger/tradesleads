@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     return Response.json({ error: "Unauthorized." }, { status: 401 });
   }
 
-  const limited = enforceRateLimit({
+  const limited = await enforceRateLimit({
     request,
     key: "social-meta-start",
     limit: 20,

@@ -13,6 +13,7 @@ import {
   LEAD_TAG_REPORT,
 } from "@/lib/leads";
 import { clampText, isUuid, safeEqual } from "@/lib/report/security";
+import { verifyTurnstile } from "@/lib/security/turnstile";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import type { PresenceReportRow, ScorePayload } from "@/lib/report/types";
 
@@ -55,10 +56,10 @@ async function markReportUnlocked(input: {
 }
 
 export async function POST(request: Request) {
-  const crossOrigin = rejectCrossOrigin(request);
+  const crossOrigin = rejectCrossOrigin(request, { requireOrigin: true });
   if (crossOrigin) return crossOrigin;
 
-  const limited = enforceRateLimit({
+  const limited = await enforceRateLimit({
     request,
     key: "report-unlock",
     limit: 10,
@@ -83,6 +84,13 @@ export async function POST(request: Request) {
   }
 
   const raw = (parsedBody.body ?? {}) as Record<string, unknown>;
+
+  const turnstile = await verifyTurnstile({
+    token: raw.turnstileToken,
+    request,
+  });
+  if (!turnstile.ok) return turnstile.response;
+
   const reportId = clampText(
     typeof raw.reportId === "string" ? raw.reportId : "",
     64,
@@ -134,7 +142,7 @@ export async function POST(request: Request) {
   const email = emailParsed.email;
   const phone = phoneParsed.phone;
 
-  const emailLimited = enforceKeyedRateLimit({
+  const emailLimited = await enforceKeyedRateLimit({
     key: `report-unlock-email:${email}`,
     limit: 5,
     windowMs: 60 * 60_000,

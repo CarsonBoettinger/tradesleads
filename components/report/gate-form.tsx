@@ -1,8 +1,12 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { formatPhone, parseEmail, parsePhone } from "@/lib/contact";
+import {
+  TurnstileWidget,
+  type TurnstileHandle,
+} from "@/components/security/turnstile-widget";
 import { primaryButtonClass } from "@/components/ui";
 
 const fieldClass =
@@ -20,8 +24,10 @@ export function GateForm({
     phone: string;
     consent: boolean;
     website?: string;
+    turnstileToken?: string;
   }) => Promise<void>;
 }) {
+  const turnstileRef = useRef<TurnstileHandle>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -51,6 +57,16 @@ export function GateForm({
     setPhone(phoneParsed.phone);
 
     try {
+      const turnstileToken = (await turnstileRef.current?.getToken()) ?? "";
+      if (
+        process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() &&
+        !turnstileToken
+      ) {
+        setError("Complete the security check and try again.");
+        setBusy(false);
+        return;
+      }
+
       await onUnlock({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
@@ -58,8 +74,10 @@ export function GateForm({
         phone: phoneParsed.phone,
         consent,
         website: honeypot,
+        turnstileToken,
       });
     } catch (err) {
+      turnstileRef.current?.reset();
       setError(err instanceof Error ? err.message : "Could not unlock.");
     } finally {
       setBusy(false);
@@ -174,6 +192,9 @@ export function GateForm({
             </Link>
             .
           </p>
+        </div>
+        <div className="sm:col-span-2">
+          <TurnstileWidget ref={turnstileRef} />
         </div>
         {error ? (
           <p className="sm:col-span-2 text-sm font-semibold text-foreman">

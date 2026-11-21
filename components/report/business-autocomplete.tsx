@@ -71,12 +71,14 @@ export function BusinessAutocomplete({
   onQueryChange,
   onSelect,
   onClearSelection,
+  getTurnstileToken,
 }: {
   value: string;
   selected: PlaceCandidate | null;
   onQueryChange: (value: string) => void;
   onSelect: (place: PlaceCandidate) => void;
   onClearSelection: () => void;
+  getTurnstileToken?: () => Promise<string | null>;
 }) {
   const listId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -152,10 +154,22 @@ export function BusinessAutocomplete({
 
     const searchTimer = setTimeout(async () => {
       try {
+        const turnstileToken = (await getTurnstileToken?.()) ?? "";
+        if (
+          process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() &&
+          !turnstileToken
+        ) {
+          if (currentRequest !== requestId.current) return;
+          setSuggestions([]);
+          setSearched(true);
+          scheduleDemoFallback();
+          return;
+        }
+
         const response = await fetch("/api/report/search", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query }),
+          body: JSON.stringify({ query, turnstileToken }),
         });
         const data = await response.json();
         if (currentRequest !== requestId.current) return;
@@ -188,7 +202,7 @@ export function BusinessAutocomplete({
       clearTimeout(searchTimer);
       if (demoTimer) clearTimeout(demoTimer);
     };
-  }, [value, selected]);
+  }, [value, selected, getTurnstileToken]);
 
   function choose(place: PlaceCandidate) {
     onSelect(place);

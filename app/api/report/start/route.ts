@@ -5,6 +5,7 @@ import {
   shouldUseReportDemoData,
 } from "@/lib/report/config";
 import {
+  enforceKeyedRateLimit,
   enforceRateLimit,
   readJsonBody,
   rejectCrossOrigin,
@@ -15,25 +16,50 @@ import {
   clampText,
   isValidPlaceId,
 } from "@/lib/report/security";
+import { verifyTurnstile } from "@/lib/security/turnstile";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: Request) {
-  const crossOrigin = rejectCrossOrigin(request);
+  const crossOrigin = rejectCrossOrigin(request, { requireOrigin: true });
   if (crossOrigin) return crossOrigin;
 
-  const limited = enforceRateLimit({
+  const limited = await enforceRateLimit({
     request,
     key: "report-start",
-    limit: 8,
+    limit: 3,
     windowMs: 60_000,
     message: "Too many report scans. Try again shortly.",
   });
   if (limited) return limited;
 
+  const hourLimited = await enforceRateLimit({
+    request,
+    key: "report-start-hour",
+    limit: 10,
+    windowMs: 60 * 60_000,
+    message: "Hourly scan limit reached. Try again later.",
+  });
+  if (hourLimited) return hourLimited;
+
+  const globalLimited = await enforceKeyedRateLimit({
+    key: `report-start:global:day:${new Date().toISOString().slice(0, 10)}`,
+    limit: 500,
+    windowMs: 24 * 60 * 60_000,
+    message: "Report capacity reached for today. Try again tomorrow.",
+  });
+  if (globalLimited) return globalLimited;
+
   const parsedBody = await readJsonBody(request, 8_192);
   if (!parsedBody.ok) return parsedBody.response;
 
   const raw = (parsedBody.body ?? {}) as Record<string, unknown>;
+
+  const turnstile = await verifyTurnstile({
+    token: raw.turnstileToken,
+    request,
+  });
+  if (!turnstile.ok) return turnstile.response;
+
   const placeId = clampText(
     typeof raw.placeId === "string" ? raw.placeId : "",
     256,
@@ -62,6 +88,14 @@ export async function POST(request: Request) {
   if (!businessName) {
     return Response.json({ error: "Business name is required." }, { status: 400 });
   }
+
+  const placeLimited = await enforceKeyedRateLimit({
+    key: `report-start:place:${placeId}`,
+    limit: 1,
+    windowMs: 15 * 60_000,
+    message: "This business was scanned recently. Try again in a few minutes.",
+  });
+  if (placeLimited) return placeLimited;
 
   if (!shouldUseReportDemoData()) {
     const missing = missingReportProviderMessage();

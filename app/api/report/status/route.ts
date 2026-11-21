@@ -7,8 +7,19 @@ import type {
   ScorePayload,
 } from "@/lib/report/types";
 
+function unlockTokenFromRequest(request: Request): string {
+  const auth = request.headers.get("authorization") ?? "";
+  if (auth.toLowerCase().startsWith("bearer ")) {
+    return auth.slice(7).trim();
+  }
+  // Legacy query param still accepted so in-flight clients do not break,
+  // but clients should prefer the Authorization header.
+  const { searchParams } = new URL(request.url);
+  return searchParams.get("token")?.trim() ?? "";
+}
+
 export async function GET(request: Request) {
-  const limited = enforceRateLimit({
+  const limited = await enforceRateLimit({
     request,
     key: "report-status",
     limit: 120,
@@ -19,7 +30,7 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const reportId = searchParams.get("reportId")?.trim() ?? "";
-  const unlockToken = searchParams.get("token")?.trim() ?? "";
+  const unlockToken = unlockTokenFromRequest(request);
 
   if (!isUuid(reportId) || unlockToken.length < 32 || unlockToken.length > 128) {
     return Response.json({ error: "Missing report credentials." }, { status: 400 });

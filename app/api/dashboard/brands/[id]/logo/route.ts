@@ -24,7 +24,7 @@ export async function POST(request: Request, context: Ctx) {
     return Response.json({ error: "Forbidden." }, { status: 403 });
   }
 
-  const limited = enforceRateLimit({
+  const limited = await enforceRateLimit({
     request,
     key: "dashboard-logo-upload",
     limit: 12,

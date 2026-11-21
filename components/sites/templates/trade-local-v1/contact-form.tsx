@@ -1,6 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import {
+  TurnstileWidget,
+  type TurnstileHandle,
+} from "@/components/security/turnstile-widget";
 
 export function SiteContactForm({
   brandId,
@@ -13,6 +17,7 @@ export function SiteContactForm({
   ctaLabel: string;
   accent: string;
 }) {
+  const turnstileRef = useRef<TurnstileHandle>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">(
     "idle",
   );
@@ -26,6 +31,16 @@ export function SiteContactForm({
     const data = new FormData(form);
 
     try {
+      const turnstileToken = (await turnstileRef.current?.getToken()) ?? "";
+      if (
+        process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() &&
+        !turnstileToken
+      ) {
+        setStatus("error");
+        setMessage("Complete the security check and try again.");
+        return;
+      }
+
       const response = await fetch("/api/sites/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -37,10 +52,12 @@ export function SiteContactForm({
           phone: String(data.get("phone") ?? ""),
           details: String(data.get("details") ?? ""),
           website: String(data.get("website") ?? ""),
+          turnstileToken,
         }),
       });
       const json = (await response.json()) as { error?: string };
       if (!response.ok) {
+        turnstileRef.current?.reset();
         setStatus("error");
         setMessage(json.error ?? "Could not send message.");
         return;
@@ -48,7 +65,9 @@ export function SiteContactForm({
       setStatus("ok");
       setMessage("Thanks — we received your request.");
       form.reset();
+      turnstileRef.current?.reset();
     } catch {
+      turnstileRef.current?.reset();
       setStatus("error");
       setMessage("Could not send message right now.");
     }
@@ -92,6 +111,9 @@ export function SiteContactForm({
         className="absolute left-[-9999px] h-0 w-0 opacity-0"
         aria-hidden
       />
+      <div className="mt-4">
+        <TurnstileWidget ref={turnstileRef} />
+      </div>
       <button
         type="submit"
         disabled={status === "loading"}

@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Staff only." }, { status: 403 });
   }
 
-  const limited = enforceRateLimit({
+  const limited = await enforceRateLimit({
     request,
     key: "dashboard-brand-create",
     limit: 20,

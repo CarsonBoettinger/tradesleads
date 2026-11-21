@@ -7,7 +7,8 @@ const features = [
     title: "Calls from people who need the work",
     body: (
       <>
-        Homeowners with a job in mind, not window shoppers passing through.
+        Google traffic from homeowners with a job in mind, not window shoppers
+        passing through.
       </>
     ),
   },
@@ -37,9 +38,9 @@ export function Booked() {
     <div className="pb-14 sm:pb-20">
       <FeaturePanel
         id="booked"
-        eyebrow="A fuller week"
+        eyebrow="More booked jobs"
         eyebrowIcon={<BoltIcon />}
-        title="Turn that search into a booked job"
+        title="Turn Google traffic into work on the calendar"
         features={features}
         visual={<GrowthVisual />}
       />

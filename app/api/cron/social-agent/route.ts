@@ -17,7 +17,11 @@ function authorized(request: Request) {
   const cronSecret = process.env.CRON_SECRET;
   const header = request.headers.get("authorization");
   const bearer = header?.startsWith("Bearer ") ? header.slice(7) : null;
-  const queryToken = new URL(request.url).searchParams.get("token");
+  // Query-string tokens leak via logs/Referer — production requires Bearer only.
+  const queryToken =
+    process.env.NODE_ENV === "production"
+      ? null
+      : new URL(request.url).searchParams.get("token");
 
   const candidates = [bearer, queryToken].filter(Boolean) as string[];
   for (const candidate of candidates) {
@@ -36,7 +40,7 @@ function authorized(request: Request) {
 
 async function handle(request: Request) {
   if (!authorized(request)) {
-    const probeLimited = enforceRateLimit({
+    const probeLimited = await enforceRateLimit({
       request,
       key: "social-cron-auth-fail",
       limit: 30,
@@ -47,7 +51,7 @@ async function handle(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const limited = enforceRateLimit({
+  const limited = await enforceRateLimit({
     request,
     key: "cron-social-agent",
     limit: 30,

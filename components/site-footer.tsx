@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
+import { siteDescriptor } from "@/lib/seo";
 import { featuredTrades, tradeHref } from "@/lib/trades";
 
 const explore = [
@@ -17,11 +18,10 @@ export function SiteFooter() {
         <div className="max-w-sm">
           <Logo tone="cream" />
           <p className="mt-6 text-[17px] leading-relaxed text-[#c5d0e0]">
-            Websites and local search growth for the businesses that build our
-            world.
+            {siteDescriptor}
           </p>
           <p className="mt-4 text-base font-bold text-cream">
-            Growth for the trades
+            AI platform for the trades
           </p>
         </div>
         <div>

@@ -1,9 +1,13 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { BusinessAutocomplete } from "@/components/report/business-autocomplete";
 import { ScanStage } from "@/components/report/scan-stage";
 import { ScoreCardView } from "@/components/report/score-card";
+import {
+  TurnstileWidget,
+  type TurnstileHandle,
+} from "@/components/security/turnstile-widget";
 import type {
   KeywordRank,
   PlaceCandidate,
@@ -16,6 +20,7 @@ import { primaryButtonClass } from "@/components/ui";
 type Step = "search" | "confirm" | "scan" | "gate" | "score";
 
 export function ReportFlow() {
+  const turnstileRef = useRef<TurnstileHandle>(null);
   const [step, setStep] = useState<Step>("search");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PlaceCandidate[]>([]);
@@ -24,6 +29,10 @@ export function ReportFlow() {
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [demoMode, setDemoMode] = useState(false);
+
+  const getTurnstileToken = useCallback(async () => {
+    return (await turnstileRef.current?.getToken()) ?? null;
+  }, []);
 
   const [reportId, setReportId] = useState<string | null>(null);
   const [unlockToken, setUnlockToken] = useState<string | null>(null);
@@ -43,18 +52,28 @@ export function ReportFlow() {
     setSearching(true);
     setError(null);
     try {
+      const turnstileToken = (await getTurnstileToken()) ?? "";
+      if (
+        process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() &&
+        !turnstileToken
+      ) {
+        throw new Error("Complete the security check and try again.");
+      }
+
       const response = await fetch("/api/report/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({ query, turnstileToken }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "Search failed.");
+      turnstileRef.current?.reset();
       setResults(data.results ?? []);
       setDemoMode(Boolean(data.demo));
       setSelected(null);
       setStep("confirm");
     } catch (err) {
+      turnstileRef.current?.reset();
       setError(err instanceof Error ? err.message : "Search failed.");
     } finally {
       setSearching(false);
@@ -66,6 +85,14 @@ export function ReportFlow() {
     setStarting(true);
     setError(null);
     try {
+      const turnstileToken = (await getTurnstileToken()) ?? "";
+      if (
+        process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() &&
+        !turnstileToken
+      ) {
+        throw new Error("Complete the security check and try again.");
+      }
+
       const response = await fetch("/api/report/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -76,10 +103,12 @@ export function ReportFlow() {
           types: selected.types,
           lat: selected.lat,
           lng: selected.lng,
+          turnstileToken,
         }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "Could not start scan.");
+      turnstileRef.current?.reset();
       setReportId(data.reportId);
       setUnlockToken(data.unlockToken);
       setPhase("queued");
@@ -88,6 +117,7 @@ export function ReportFlow() {
       setKeywords([]);
       setStep("scan");
     } catch (err) {
+      turnstileRef.current?.reset();
       setError(err instanceof Error ? err.message : "Could not start scan.");
     } finally {
       setStarting(false);
@@ -104,7 +134,12 @@ export function ReportFlow() {
     async function poll() {
       try {
         const response = await fetch(
-          `/api/report/status?reportId=${encodeURIComponent(reportId!)}&token=${encodeURIComponent(unlockToken!)}`,
+          `/api/report/status?reportId=${encodeURIComponent(reportId!)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${unlockToken}`,
+            },
+          },
         );
         const data = await response.json();
         if (!response.ok) throw new Error(data.error ?? "Status failed.");
@@ -151,6 +186,7 @@ export function ReportFlow() {
     phone: string;
     consent: boolean;
     website?: string;
+    turnstileToken?: string;
   }) {
     if (!reportId || !unlockToken) {
       throw new Error("Missing report session.");
@@ -184,6 +220,7 @@ export function ReportFlow() {
 
   return (
     <div className="space-y-8">
+      <TurnstileWidget ref={turnstileRef} mode="invisible" />
       {step === "search" || step === "confirm" ? (
         <section className="rounded-[12px] border-2 border-peach bg-white p-6 sm:p-8">
           <p className="text-base font-bold tracking-[0.16em] uppercase text-foreman">
@@ -213,6 +250,7 @@ export function ReportFlow() {
                 setError(null);
               }}
               onClearSelection={() => setSelected(null)}
+              getTurnstileToken={getTurnstileToken}
             />
             <div className="flex items-end">
               <button

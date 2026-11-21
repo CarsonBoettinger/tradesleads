@@ -64,7 +64,7 @@ export async function PATCH(request: Request, context: Ctx) {
     return Response.json({ error: "Forbidden." }, { status: 403 });
   }
 
-  const limited = enforceRateLimit({
+  const limited = await enforceRateLimit({
     request,
     key: "social-settings-patch",
     limit: 40,
@@ -115,6 +115,15 @@ export async function DELETE(request: Request, context: Ctx) {
   if (!session) {
     return Response.json({ error: "Unauthorized." }, { status: 401 });
   }
+
+  const limited = await enforceRateLimit({
+    request,
+    key: "social-disconnect",
+    limit: 20,
+    windowMs: 15 * 60_000,
+    message: "Too many disconnect attempts.",
+  });
+  if (limited) return limited;
 
   const { brandId } = await context.params;
   const allowed = await userCanAccessBrand(session.profile, brandId);

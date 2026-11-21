@@ -27,12 +27,16 @@ Next.js 16 runs on Netlify with the OpenNext adapter (applied automatically — 
 | `SUPABASE_URL` | Supabase project URL (**server-only**, not `NEXT_PUBLIC_`) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server writes (**secret**, never `NEXT_PUBLIC_`) |
 | `BLOG_AGENT_TOKEN` | Must match `public.app_settings.blog_agent_token` |
-| `CRON_SECRET` | Auth for scheduled daily blog job |
+| `CRON_SECRET` | Auth for scheduled daily blog job (Bearer only in production) |
 | `GOOGLE_PLACES_API_KEY` | Required for `/report` in production |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Durable API rate limits (required in production) |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile on public forms |
 
-Do **not** prefix secrets with `NEXT_PUBLIC_`. Forms and reports call `/api/*` routes; keys stay on the server.
+Do **not** prefix secrets with `NEXT_PUBLIC_` (except the Turnstile site key). Forms and reports call `/api/*` routes; keys stay on the server.
 
 Optional: `OPENAI_API_KEY`, `OPENAI_BLOG_MODEL`, `PAGESPEED_API_KEY`, `REPORT_KEYWORD_LIMIT`. Keep Telegram tokens in Supabase Vault, not Netlify.
+
+In Supabase Auth, enable **leaked password protection** (HaveIBeenPwned) under Authentication → Providers → Email.
 
 4. Deploy. The daily blog job is `netlify/functions/daily-blog` on schedule `0 13 * * *` UTC (calls `/api/cron/daily-blog`).
 

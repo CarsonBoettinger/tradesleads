@@ -4,17 +4,17 @@ import { Accent, FeaturePanel } from "@/components/landing/feature-panel";
 const features = [
   {
     icon: <UsersIcon />,
-    title: "We keep your site looking like the work",
+    title: "AI keeps your site looking like the work",
     body: (
       <>
-        Services, crew photos, and a clear way to call, updated for you so
-        people <Accent>think of you first</Accent>.
+        Services, crew photos, and a clear way to call stay updated so people{" "}
+        <Accent>think of you first</Accent>.
       </>
     ),
   },
   {
     icon: <CalendarIcon />,
-    title: "We keep your listing true",
+    title: "AI keeps your listing true",
     body: (
       <>
         Hours, service area, and photos stay matched to what you actually do{" "}
@@ -24,11 +24,11 @@ const features = [
   },
   {
     icon: <SparkIcon />,
-    title: "We turn finished jobs into the next ones",
+    title: "Finished jobs become the next ones",
     body: (
       <>
         Review asks, follow-ups, and replies go out for you so past customers
-        can find you again.
+        come back and hire you again.
       </>
     ),
   },
@@ -39,9 +39,9 @@ export function Remembered() {
     <FeaturePanel
       id="remembered"
       reverse
-      eyebrow="Stay in mind"
+      eyebrow="Customers who come back"
       eyebrowIcon={<HeartIcon />}
-      title="Be the name they call next time"
+      title="Stay the name they search and call again"
       features={features}
       visual={<KeepCurrentVisual />}
     />

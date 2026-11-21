@@ -3,7 +3,11 @@ import { requireStaff } from "@/lib/auth/profile";
 import { getBrandById } from "@/lib/sites/brands";
 import { createGenerationJob } from "@/lib/sites/jobs";
 import { runGeneration } from "@/lib/sites/run";
-import { enforceRateLimit, rejectCrossOrigin } from "@/lib/http-guard";
+import {
+  enforceKeyedRateLimit,
+  enforceRateLimit,
+  rejectCrossOrigin,
+} from "@/lib/http-guard";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -16,13 +20,21 @@ export async function POST(request: Request, context: Ctx) {
     return Response.json({ error: "Staff only." }, { status: 403 });
   }
 
-  const limited = enforceRateLimit({
+  const limited = await enforceRateLimit({
     request,
     key: "dashboard-generate",
     limit: 10,
     windowMs: 60_000,
   });
   if (limited) return limited;
+
+  const userLimited = await enforceKeyedRateLimit({
+    key: `dashboard-generate-user:${staff.user.id}`,
+    limit: 5,
+    windowMs: 60 * 60_000,
+    message: "Hourly generation limit reached.",
+  });
+  if (userLimited) return userLimited;
 
   const { id } = await context.params;
   const brand = await getBrandById(id);

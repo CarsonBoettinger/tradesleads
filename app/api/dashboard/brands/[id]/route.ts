@@ -76,7 +76,7 @@ export async function PATCH(request: Request, context: Ctx) {
     return Response.json({ error: "Forbidden." }, { status: 403 });
   }
 
-  const limited = enforceRateLimit({
+  const limited = await enforceRateLimit({
     request,
     key: "dashboard-brand-patch",
     limit: 40,
@@ -271,7 +271,7 @@ export async function DELETE(request: Request, context: Ctx) {
     return Response.json({ error: "Not found." }, { status: 404 });
   }
 
-  const limited = enforceRateLimit({
+  const limited = await enforceRateLimit({
     request,
     key: "dashboard-brand-delete",
     limit: 20,

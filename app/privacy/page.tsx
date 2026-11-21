@@ -358,10 +358,16 @@ const sections: LegalSection[] = [
           <li>
             <strong>Rate limits.</strong> When you submit a form or start a
             scan, the server reads the IP address from the request (including
-            common forwarding headers) and keeps a short counter in memory.
-            The counter expires within minutes to about an hour, depending on
-            the route, and it is not written into your lead record. It exists
-            to slow abuse.
+            common forwarding headers) and increments a short-lived counter in
+            our rate-limit store (Upstash Redis when configured). The counter
+            expires within minutes to about a day, depending on the route, and
+            it is not written into your lead record. It exists to slow abuse.
+          </li>
+          <li>
+            <strong>Bot check.</strong> Public forms and report actions may use
+            Cloudflare Turnstile. Your browser loads a small challenge from
+            Cloudflare; we send the resulting token to Cloudflare to verify you
+            are human. We do not use Turnstile for advertising.
           </li>
           <li>
             <strong>Hosting logs.</strong> Netlify, which hosts the site, may
@@ -680,8 +686,8 @@ const sections: LegalSection[] = [
             backups until those backups age out.
           </li>
           <li>
-            <strong>Rate-limit counters.</strong> Minutes, in server memory, not
-            a permanent file.
+            <strong>Rate-limit counters.</strong> Minutes to about a day in the
+            rate-limit store, not a permanent marketing file.
           </li>
           <li>
             <strong>Hosting logs.</strong> A short security window. We do not
