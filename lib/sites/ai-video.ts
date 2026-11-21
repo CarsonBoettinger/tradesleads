@@ -16,8 +16,9 @@ async function resolveFfmpegPath() {
   ];
   try {
     const mod = await import("ffmpeg-static");
-    if (typeof mod.default === "string" && mod.default) {
-      candidates.unshift(mod.default);
+    const packaged = mod.default;
+    if (typeof packaged === "string" && packaged) {
+      candidates.unshift(packaged);
     }
   } catch {
     // ignore
@@ -37,7 +38,9 @@ async function runFfmpeg(args: string[]) {
   const ffmpegPath = await resolveFfmpegPath();
 
   await new Promise<void>((resolve, reject) => {
-    const child = spawn(ffmpegPath, args, { stdio: ["ignore", "ignore", "pipe"] });
+    const child = spawn(/*turbopackIgnore: true*/ ffmpegPath, args, {
+      stdio: ["ignore", "ignore", "pipe"],
+    });
     let stderr = "";
     child.stderr.on("data", (chunk: Buffer) => {
       stderr += chunk.toString("utf8");
