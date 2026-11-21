@@ -1,0 +1,14 @@
+<h2>You're invited to Kalvez</h2>
+<p>Hi{{ if .Data.full_name }} {{ .Data.full_name }}{{ end }},</p>
+<p>
+  Kalvez created your client dashboard account. Sign in with the temporary
+  password below, then choose a new password.
+</p>
+<p><strong>Email:</strong> {{ .Email }}</p>
+<p><strong>Temporary password:</strong> {{ .Data.temporary_password }}</p>
+<p>
+  <a href="{{ .RedirectTo }}">Sign in to your dashboard</a>
+</p>
+<p>
+  For security, you will be asked to change this password on first sign-in.
+</p>

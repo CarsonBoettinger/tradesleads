@@ -88,6 +88,15 @@ body {
   animation: hero-feed-row-in 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.96s both;
 }
 
+@keyframes site-kenburns {
+  from {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.14) translate3d(-2.2%, -1.4%, 0);
+  }
+}
+
 @keyframes hero-outcome-in {
   from {
     opacity: 0;

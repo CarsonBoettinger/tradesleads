@@ -98,7 +98,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${jakarta.variable} antialiased`}>
+    <html
+      lang="en"
+      data-scroll-behavior="smooth"
+      className={`${jakarta.variable} antialiased`}
+    >
       <body className="min-h-dvh bg-cream font-sans text-cocoa">
         <JsonLd data={organizationJsonLd()} />
         <JsonLd data={websiteJsonLd()} />

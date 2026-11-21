@@ -24,10 +24,24 @@ function allowedOrigins(): Set<string> {
   add(process.env.VERCEL_URL);
   add(process.env.VERCEL_BRANCH_URL);
   add(process.env.VERCEL_PROJECT_PRODUCTION_URL);
+  add(process.env.NEXT_PUBLIC_DASHBOARD_HOST);
+  add(process.env.NEXT_PUBLIC_SITES_ROOT_HOST);
+
+  // dashboard.kalvez.com / *.sites.kalvez.com derived from site URL
+  try {
+    const site = new URL(getSiteUrl());
+    const root = site.hostname.replace(/^www\./, "");
+    add(`${site.protocol}//dashboard.${root}`);
+    add(`${site.protocol}//sites.${root}`);
+  } catch {
+    // ignore
+  }
 
   if (process.env.NODE_ENV !== "production") {
     origins.add("http://localhost:3000");
     origins.add("http://127.0.0.1:3000");
+    origins.add("http://dashboard.localhost:3000");
+    origins.add("http://sites.localhost:3000");
   }
 
   return origins;

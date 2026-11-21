@@ -17,3 +17,7 @@
 # Replaces vercel.json cron: hit the Next.js route so revalidatePath/Tag work.
 [functions."daily-blog"]
   schedule = "0 13 * * *"
+
+# Social posting agent: generate draft pipeline + publish due posts.
+[functions."social-agent"]
+  schedule = "0 * * * *"

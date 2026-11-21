@@ -521,7 +521,7 @@ export function keywordsForTrade(trade: ReportTrade, town: string | null) {
   );
 }
 
-function servicePhrasesForTrade(trade: ReportTrade) {
+export function servicePhrasesForTrade(trade: ReportTrade) {
   return TRADE_KEYWORDS[trade].map((keyword) =>
     keyword.replace(/\s+near me$/i, "").trim(),
   );

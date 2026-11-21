@@ -189,6 +189,32 @@ export async function findExistingLead(input: {
   return rows[0] ?? null;
 }
 
+/**
+ * True when this lead is already attached to a presence report for a different
+ * Google place. DB triggers forbid sharing one lead across places.
+ */
+export async function leadLinkedToOtherPlace(
+  leadId: string,
+  placeId: string,
+): Promise<boolean> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("presence_reports")
+    .select("id")
+    .eq("lead_id", leadId)
+    .not("place_id", "is", null)
+    .neq("place_id", placeId)
+    .limit(1);
+
+  if (error) {
+    console.error("Lead place conflict lookup failed:", error);
+    // Fail closed: create a new lead rather than risk a trigger exception.
+    return true;
+  }
+
+  return Boolean(data?.length);
+}
+
 /** Load the best existing scored report for a lead / place. */
 export async function findExistingReportForLead(input: {
   leadId: string;
@@ -207,7 +233,11 @@ export async function findExistingReportForLead(input: {
       .eq("id", input.reportId)
       .maybeSingle();
     const row = data as PresenceReportRow | null;
-    if (row?.score_payload) {
+    // Only reuse when the stored report is for the same place (or place unknown).
+    if (
+      row?.score_payload &&
+      (!input.placeId || !row.place_id || row.place_id === input.placeId)
+    ) {
       return { report: row, scorePayload: row.score_payload as ScorePayload };
     }
   }

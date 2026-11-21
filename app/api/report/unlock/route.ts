@@ -9,6 +9,7 @@ import {
 import {
   findExistingLead,
   findExistingReportForLead,
+  leadLinkedToOtherPlace,
   LEAD_TAG_REPORT,
 } from "@/lib/leads";
 import { clampText, isUuid, safeEqual } from "@/lib/report/security";
@@ -25,6 +26,32 @@ function scoreResponse(scorePayload: ScorePayload, reused = false) {
     web: scorePayload.web,
     competitors: scorePayload.competitors,
   };
+}
+
+async function markReportUnlocked(input: {
+  reportId: string;
+  unlockToken: string;
+  leadId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+}) {
+  const supabase = getSupabaseAdmin();
+  return supabase
+    .from("presence_reports")
+    .update({
+      status: "unlocked",
+      lead_id: input.leadId,
+      contact_first_name: input.firstName,
+      contact_last_name: input.lastName,
+      contact_email: input.email,
+      contact_phone: input.phone,
+      unlocked_at: new Date().toISOString(),
+    })
+    .eq("id", input.reportId)
+    .eq("unlock_token", input.unlockToken)
+    .in("status", ["ready", "unlocked"]);
 }
 
 export async function POST(request: Request) {
@@ -151,17 +178,33 @@ export async function POST(request: Request) {
       return Response.json(scoreResponse(currentScore));
     }
 
-    const existingLead = await findExistingLead({
+    const matchedLead = await findExistingLead({
       email,
       phoneDigits: phoneParsed.digits,
       placeId: row.place_id,
     });
 
-    if (existingLead) {
+    // Only reuse a lead for the same place. DB triggers reject linking one lead
+    // to reports for different businesses, and block place reassignment after CRM activity.
+    let reusableLead = matchedLead;
+    if (matchedLead) {
+      const placeMismatch =
+        Boolean(matchedLead.place_id) &&
+        Boolean(row.place_id) &&
+        matchedLead.place_id !== row.place_id;
+      const linkedElsewhere = row.place_id
+        ? await leadLinkedToOtherPlace(matchedLead.id, row.place_id)
+        : false;
+      if (placeMismatch || linkedElsewhere) {
+        reusableLead = null;
+      }
+    }
+
+    if (reusableLead) {
       const existingReport = await findExistingReportForLead({
-        leadId: existingLead.id,
+        leadId: reusableLead.id,
         placeId: row.place_id,
-        reportId: existingLead.report_id,
+        reportId: reusableLead.report_id,
       });
 
       // Same business already reported for this lead: reuse that report card.
@@ -170,24 +213,26 @@ export async function POST(request: Request) {
         existingReport.report.place_id === row.place_id &&
         existingReport.report.id !== row.id
       ) {
-        await supabase
-          .from("presence_reports")
-          .update({
-            status: "unlocked",
-            lead_id: existingLead.id,
-            contact_first_name: firstName,
-            contact_last_name: lastName,
-            contact_email: email,
-            contact_phone: phone,
-            unlocked_at: new Date().toISOString(),
-          })
-          .eq("id", reportId)
-          .eq("unlock_token", unlockToken);
-
+        const { error: reuseUpdateError } = await markReportUnlocked({
+          reportId,
+          unlockToken,
+          leadId: reusableLead.id,
+          firstName,
+          lastName,
+          email,
+          phone,
+        });
+        if (reuseUpdateError) {
+          console.error("Report unlock update failed:", reuseUpdateError);
+          return Response.json(
+            { error: "Could not unlock report." },
+            { status: 500 },
+          );
+        }
         return Response.json(scoreResponse(existingReport.scorePayload, true));
       }
 
-      await supabase
+      const { error: leadUpdateError } = await supabase
         .from("leads")
         .update({
           first_name: firstName,
@@ -200,32 +245,32 @@ export async function POST(request: Request) {
           report_id: row.id,
           consent: true,
         })
-        .eq("id", existingLead.id);
+        .eq("id", reusableLead.id);
 
-      const { error: updateError } = await supabase
-        .from("presence_reports")
-        .update({
-          status: "unlocked",
-          lead_id: existingLead.id,
-          contact_first_name: firstName,
-          contact_last_name: lastName,
-          contact_email: email,
-          contact_phone: phone,
-          unlocked_at: new Date().toISOString(),
-        })
-        .eq("id", reportId)
-        .eq("unlock_token", unlockToken)
-        .in("status", ["ready", "unlocked"]);
+      if (leadUpdateError) {
+        console.error("Lead update from report failed:", leadUpdateError);
+        // Fall through to insert a fresh lead for this place.
+      } else {
+        const { error: updateError } = await markReportUnlocked({
+          reportId,
+          unlockToken,
+          leadId: reusableLead.id,
+          firstName,
+          lastName,
+          email,
+          phone,
+        });
 
-      if (updateError) {
-        console.error("Report unlock update failed:", updateError);
-        return Response.json(
-          { error: "Could not unlock report." },
-          { status: 500 },
-        );
+        if (updateError) {
+          console.error("Report unlock update failed:", updateError);
+          return Response.json(
+            { error: "Could not unlock report." },
+            { status: 500 },
+          );
+        }
+
+        return Response.json(scoreResponse(currentScore, true));
       }
-
-      return Response.json(scoreResponse(currentScore, true));
     }
 
     const { data: lead, error: leadError } = await supabase
@@ -259,20 +304,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const { error: updateError } = await supabase
-      .from("presence_reports")
-      .update({
-        status: "unlocked",
-        lead_id: lead.id,
-        contact_first_name: firstName,
-        contact_last_name: lastName,
-        contact_email: email,
-        contact_phone: phone,
-        unlocked_at: new Date().toISOString(),
-      })
-      .eq("id", reportId)
-      .eq("unlock_token", unlockToken)
-      .in("status", ["ready", "unlocked"]);
+    const { error: updateError } = await markReportUnlocked({
+      reportId,
+      unlockToken,
+      leadId: lead.id,
+      firstName,
+      lastName,
+      email,
+      phone,
+    });
 
     if (updateError) {
       console.error("Report unlock update failed:", updateError);
