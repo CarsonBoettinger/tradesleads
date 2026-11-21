@@ -7,6 +7,9 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  # Model IDs are not secrets, but Netlify secrets scanning fails when their
+  # values match fallbacks in source / .env.example.
+  SECRETS_SCAN_OMIT_KEYS = "OPENAI_BLOG_MODEL,OPENAI_SITE_MODEL,OPENAI_SOCIAL_MODEL,OPENAI_IMAGE_MODEL,GEMINI_VIDEO_MODEL"
   # Ensure Next public env is available at build time for metadata/canonicals.
   # Set the rest in Netlify UI → Environment variables (see .env.example).
 
