@@ -1,6 +1,13 @@
 import Image from "next/image";
 import { HeroRotatingPhrase } from "@/components/landing/hero-rotating-phrase";
-import { CtaLink, Container, demoCta, demoHref } from "@/components/ui";
+import {
+  Container,
+  CtaLink,
+  demoCta,
+  demoHref,
+  reportCta,
+  reportHref,
+} from "@/components/ui";
 
 const feed = [
   {
@@ -47,7 +54,7 @@ export function Hero() {
         <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-12">
           <div>
             <p className="inline-flex rounded-lg bg-peach px-4 py-2 text-base font-bold text-cocoa">
-              Built for the trades
+              All-in-one AI marketing
             </p>
             <h1 className="mt-6 max-w-2xl text-[2.35rem] leading-[1.08] font-extrabold tracking-[-0.02em] text-cocoa sm:text-5xl lg:text-6xl">
               <span className="block">The AI platform for</span>
@@ -60,13 +67,13 @@ export function Hero() {
               people find you.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <CtaLink href={demoHref}>{demoCta}</CtaLink>
-              <CtaLink href="#how" variant="ghost">
-                See how it works
+              <CtaLink href={reportHref}>{reportCta}</CtaLink>
+              <CtaLink href={demoHref} variant="ghost">
+                {demoCta}
               </CtaLink>
             </div>
             <p className="mt-5 max-w-md text-[15px] leading-relaxed text-muted">
-              A 20-minute look at your Google visibility, traffic, and what it
+              Free AI report on your Google visibility, traffic, and what it
               would take to fill more of the week.
             </p>
           </div>

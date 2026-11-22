@@ -1,21 +1,25 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { siteDescriptor } from "@/lib/seo";
+import { featuredServices, serviceHref } from "@/lib/services";
 import { featuredTrades, tradeHref } from "@/lib/trades";
 
 const explore = [
   { href: "/", label: "Home" },
+  { href: "/services", label: "What we do" },
   { href: "/trades", label: "All trades" },
   { href: "/blog", label: "Blog" },
   { href: "/report", label: "Free report" },
   { href: "/free-demo", label: "Book a free demo" },
 ];
 
+const footerServices = featuredServices.slice(0, 6);
+
 export function SiteFooter() {
   return (
     <footer className="bg-cocoa text-cream">
-      <div className="mx-auto grid w-full max-w-6xl gap-12 px-5 py-16 sm:px-8 md:grid-cols-[1.4fr_1fr_1fr]">
-        <div className="max-w-sm">
+      <div className="mx-auto grid w-full max-w-6xl gap-12 px-5 py-16 sm:px-8 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+        <div className="max-w-sm md:col-span-2 lg:col-span-1">
           <Logo tone="cream" />
           <p className="mt-6 text-[17px] leading-relaxed text-[#c5d0e0]">
             {siteDescriptor}
@@ -39,6 +43,31 @@ export function SiteFooter() {
                 </Link>
               </li>
             ))}
+          </ul>
+        </div>
+        <div>
+          <h2 className="text-base font-bold tracking-[0.16em] text-[#c5d0e0] uppercase">
+            What we do
+          </h2>
+          <ul className="mt-4 space-y-2">
+            {footerServices.map((service) => (
+              <li key={service.slug}>
+                <Link
+                  href={serviceHref(service.slug)}
+                  className="inline-flex min-h-11 items-center text-[17px] font-bold text-cream underline decoration-transparent underline-offset-4 hover:decoration-cream focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
+                >
+                  {service.name}
+                </Link>
+              </li>
+            ))}
+            <li>
+              <Link
+                href="/services"
+                className="inline-flex min-h-11 items-center text-[17px] font-bold text-cream underline decoration-transparent underline-offset-4 hover:decoration-cream focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
+              >
+                All services
+              </Link>
+            </li>
           </ul>
         </div>
         <div>

@@ -2,10 +2,24 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase/env";
 
-export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({
-    request,
-  });
+type UpdateSessionOptions = {
+  /** When set, responses use rewrite instead of next() (dashboard host routing). */
+  rewriteTo?: URL;
+};
+
+function baseResponse(request: NextRequest, rewriteTo?: URL) {
+  if (rewriteTo) {
+    return NextResponse.rewrite(rewriteTo, { request });
+  }
+  return NextResponse.next({ request });
+}
+
+export async function updateSession(
+  request: NextRequest,
+  options: UpdateSessionOptions = {},
+) {
+  const { rewriteTo } = options;
+  let response = baseResponse(request, rewriteTo);
 
   const supabase = createServerClient(getSupabaseUrl(), getSupabaseAnonKey(), {
     cookies: {
@@ -16,9 +30,9 @@ export async function updateSession(request: NextRequest) {
         for (const { name, value } of cookiesToSet) {
           request.cookies.set(name, value);
         }
-        response = NextResponse.next({ request });
-        for (const { name, value, options } of cookiesToSet) {
-          response.cookies.set(name, value, options);
+        response = baseResponse(request, rewriteTo);
+        for (const { name, value, options: cookieOptions } of cookiesToSet) {
+          response.cookies.set(name, value, cookieOptions);
         }
       },
     },

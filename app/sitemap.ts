@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { cacheTag } from "next/cache";
 import { listPublishedPosts } from "@/lib/blog/posts";
+import { serviceHref, services } from "@/lib/services";
 import { absoluteUrl } from "@/lib/site";
 import { tradeHref, trades } from "@/lib/trades";
 
@@ -43,6 +44,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
+      url: absoluteUrl("/services"),
+      lastModified: SITE_UPDATED_AT,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
       url: absoluteUrl("/privacy"),
       lastModified: new Date("2026-11-17"),
       changeFrequency: "yearly",
@@ -56,6 +63,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     ...trades.map((trade) => ({
       url: absoluteUrl(tradeHref(trade.slug)),
+      lastModified: SITE_UPDATED_AT,
+      changeFrequency: "monthly" as const,
+      priority: 0.85,
+    })),
+    ...services.map((service) => ({
+      url: absoluteUrl(serviceHref(service.slug)),
       lastModified: SITE_UPDATED_AT,
       changeFrequency: "monthly" as const,
       priority: 0.85,

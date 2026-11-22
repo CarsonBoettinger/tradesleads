@@ -27,51 +27,63 @@ export async function proxy(request: NextRequest) {
     return rewritten;
   }
 
+  // dashboard.kalvez.com/login → /dashboard/login (logical path for auth + app).
+  let dashboardPath = pathname;
+  let dashboardRewriteUrl: URL | null = null;
   if (
     isDashboardHost(hostname) &&
     !passthrough &&
     !pathname.startsWith("/dashboard")
   ) {
-    const url = request.nextUrl.clone();
-    url.pathname = `/dashboard${pathname === "/" ? "" : pathname}`;
-    return NextResponse.rewrite(url);
+    dashboardPath = `/dashboard${pathname === "/" ? "" : pathname}`;
+    dashboardRewriteUrl = request.nextUrl.clone();
+    dashboardRewriteUrl.pathname = dashboardPath;
   }
 
   const isDashboardPath =
-    pathname.startsWith("/dashboard") || isDashboardHost(hostname);
+    dashboardPath.startsWith("/dashboard") || isDashboardHost(hostname);
 
   if (!isDashboardPath) {
     return NextResponse.next();
   }
 
   // Skip auth refresh for static assets under dashboard.
-  if (pathname.includes(".") && !pathname.endsWith(".html")) {
+  if (dashboardPath.includes(".") && !dashboardPath.endsWith(".html")) {
+    if (dashboardRewriteUrl) {
+      return NextResponse.rewrite(dashboardRewriteUrl);
+    }
     return NextResponse.next();
   }
 
   let sessionResult: Awaited<ReturnType<typeof updateSession>>;
   try {
-    sessionResult = await updateSession(request);
+    sessionResult = await updateSession(request, {
+      rewriteTo: dashboardRewriteUrl ?? undefined,
+    });
   } catch {
     // Missing anon key in local env — still allow login page to show error.
     if (
-      pathname === "/dashboard/login" ||
-      pathname.endsWith("/dashboard/login")
+      dashboardPath === "/dashboard/login" ||
+      dashboardPath.endsWith("/dashboard/login")
     ) {
+      if (dashboardRewriteUrl) {
+        return NextResponse.rewrite(dashboardRewriteUrl);
+      }
       return NextResponse.next();
     }
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/dashboard/login";
-    loginUrl.search = `?next=${encodeURIComponent(pathname + search)}`;
+    loginUrl.search = `?next=${encodeURIComponent(dashboardPath + search)}`;
     return NextResponse.redirect(loginUrl);
   }
 
   const { response, user } = sessionResult;
   const isLogin =
-    pathname === "/dashboard/login" || pathname.endsWith("/dashboard/login");
+    dashboardPath === "/dashboard/login" ||
+    dashboardPath.endsWith("/dashboard/login");
   const isChangePassword =
-    pathname === "/dashboard/change-password" ||
-    pathname.endsWith("/dashboard/change-password");
+    dashboardPath === "/dashboard/change-password" ||
+    dashboardPath.endsWith("/dashboard/change-password");
   const mustChangePassword = Boolean(
     user?.app_metadata?.must_change_password,
   );
@@ -79,7 +91,7 @@ export async function proxy(request: NextRequest) {
   if (!user && !isLogin) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/dashboard/login";
-    loginUrl.search = `?next=${encodeURIComponent(pathname + search)}`;
+    loginUrl.search = `?next=${encodeURIComponent(dashboardPath + search)}`;
     return NextResponse.redirect(loginUrl);
   }
 

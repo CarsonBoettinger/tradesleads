@@ -134,9 +134,16 @@ export function organizationJsonLd() {
     knowsAbout: [
       "AI for contractors",
       "Local SEO",
+      "SEO for contractors",
+      "Answer engine optimization",
+      "Generative engine optimization",
       "Google visibility for trades",
       "Trade business websites",
       "Google Business Profile",
+      "Backlinks for trade businesses",
+      "Content marketing for trades",
+      "Automated review management",
+      "CRM for trade businesses",
       "Plumbing marketing",
       "HVAC marketing",
       "Electrical contractor marketing",
@@ -253,6 +260,45 @@ export function tradeServiceJsonLd(trade: {
     audience: {
       "@type": "Audience",
       audienceType: trade.name,
+    },
+    offers: {
+      "@type": "Offer",
+      url: absoluteUrl("/free-demo"),
+      price: "0",
+      priceCurrency: "USD",
+      description: "Free 20-minute demo",
+      availability: "https://schema.org/InStock",
+    },
+  };
+}
+
+export function serviceJsonLd(service: {
+  name: string;
+  pageTitle: string;
+  description: string;
+  slug: string;
+}) {
+  const url = absoluteUrl(`/services/${service.slug}`);
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${url}#service`,
+    name: service.pageTitle,
+    serviceType: service.name,
+    description: service.description,
+    url,
+    provider: {
+      "@type": "Organization",
+      name: siteName,
+      url: getSiteUrl(),
+    },
+    areaServed: {
+      "@type": "Country",
+      name: "United States",
+    },
+    audience: {
+      "@type": "Audience",
+      audienceType: "Trade businesses",
     },
     offers: {
       "@type": "Offer",

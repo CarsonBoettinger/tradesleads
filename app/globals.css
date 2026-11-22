@@ -34,20 +34,6 @@ body {
   overflow-x: hidden;
 }
 
-.marquee {
-  overflow: hidden;
-  width: 100%;
-  max-width: 100%;
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    transparent,
-    #000 8%,
-    #000 92%,
-    transparent
-  );
-  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-}
-
 ::selection {
   background: var(--peach);
   color: var(--cocoa);
@@ -147,23 +133,6 @@ body {
 
 .hero-phrase-pop {
   animation: hero-phrase-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@keyframes marquee {
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.marquee-track {
-  display: flex;
-  width: max-content;
-  animation: marquee 42s linear infinite;
-}
-
-.marquee:hover .marquee-track,
-.marquee:focus-within .marquee-track {
-  animation-play-state: paused;
 }
 
 .scan-line {
@@ -337,7 +306,6 @@ body {
     scroll-behavior: auto;
   }
 
-  .marquee-track,
   .hero-outcome,
   .hero-feed-card,
   .hero-feed-row-1,

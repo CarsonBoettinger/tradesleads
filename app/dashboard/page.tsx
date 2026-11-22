@@ -9,7 +9,7 @@ export const instant = false;
 
 export default async function DashboardHomePage() {
   await connection();
-  const session = await requireDashboardUser();
+  const session = await requireDashboardUser().catch(() => null);
   if (!session) redirect("/dashboard/login");
 
   const brands = await listBrandsForProfile(session.profile);

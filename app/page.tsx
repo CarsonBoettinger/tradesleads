@@ -9,7 +9,6 @@ import { Hero } from "@/components/landing/hero";
 import { How } from "@/components/landing/how";
 import { Remembered } from "@/components/landing/remembered";
 import { Scenes } from "@/components/landing/scenes";
-import { TradeStrip } from "@/components/landing/trade-strip";
 import { Trades } from "@/components/landing/trades";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -39,7 +38,6 @@ export default function Home() {
       <SiteHeader />
       <main id="content">
         <Hero />
-        <TradeStrip />
         <Found />
         <Remembered />
         <Booked />
