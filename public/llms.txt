@@ -1,0 +1,30 @@
+# Kalvez
+
+> Kalvez is the AI platform for trade businesses: stronger Google visibility, clearer websites, more local traffic, and booked jobs.
+
+Kalvez helps plumbers, HVAC companies, roofers, electricians, general contractors, landscapers, and other local trades show up when customers search and turn that attention into calls.
+
+## Main pages
+
+- [Home](https://kalvez.com/): Product overview for trade owners who want more jobs from Google
+- [Free digital presence report](https://kalvez.com/report): Lead magnet that scores Map Pack, organic search, Google Business Profile, website experience, and competitors
+- [Book a free demo](https://kalvez.com/free-demo): 20-minute walkthrough of listing and website gaps
+- [Trades](https://kalvez.com/trades): Growth pages by trade
+- [Services](https://kalvez.com/services): Local SEO, websites, reviews, CRM, scheduling, and related services
+- [Blog](https://kalvez.com/blog): Practical tips on Google, websites, reviews, and booking jobs
+
+## Featured trades
+
+- [Plumber Marketing & Local SEO](https://kalvez.com/trades/plumbers)
+- [HVAC Marketing & Local SEO](https://kalvez.com/trades/hvac)
+- [Roofer Marketing & Local SEO](https://kalvez.com/trades/roofers)
+- [Electrician Marketing & Local SEO](https://kalvez.com/trades/electricians)
+- [General Contractor Marketing & Local SEO](https://kalvez.com/trades/general-contractors)
+- [Landscaper Marketing & Local SEO](https://kalvez.com/trades/landscapers)
+
+## Optional
+
+- [Privacy](https://kalvez.com/privacy)
+- [Terms](https://kalvez.com/terms)
+- [Sitemap](https://kalvez.com/sitemap.xml)
+- [RSS](https://kalvez.com/feed.xml)

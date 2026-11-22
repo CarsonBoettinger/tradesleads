@@ -18,7 +18,7 @@ export async function createServerSupabase() {
             cookieStore.set(name, value, options);
           }
         } catch {
-          // Called from a Server Component — proxy will refresh sessions.
+          // Called from a Server Component - proxy will refresh sessions.
         }
       },
     },

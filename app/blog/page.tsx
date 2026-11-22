@@ -3,7 +3,12 @@ import Link from "next/link";
 import { JsonLd } from "@/components/json-ld";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { Container, Eyebrow, demoHref, primaryButtonClass } from "@/components/ui";
+import {
+  Container,
+  Eyebrow,
+  demoHref,
+  primaryButtonClass,
+} from "@/components/ui";
 import { listPublishedPosts } from "@/lib/blog/posts";
 import {
   breadcrumbJsonLd,
@@ -15,6 +20,9 @@ import {
 const title = "Blog";
 const description =
   "Quick marketing and local-search tips for trade owners who can’t afford to lose another customer - Google, websites, reviews, and getting calls.";
+
+/** Blog index is shared public content - keep the full route static. */
+export const ensureStatic = "navigation";
 
 export const metadata: Metadata = {
   ...buildPageMetadata({
@@ -93,7 +101,10 @@ export default async function BlogIndexPage() {
           {posts.length === 0 ? (
             <p className="mt-14 text-[17px] text-muted">
               Articles are on the way.{" "}
-              <Link href={demoHref} className="font-bold text-foreman underline">
+              <Link
+                href={demoHref}
+                className="font-bold text-foreman underline"
+              >
                 Book a free demo
               </Link>{" "}
               while you wait.

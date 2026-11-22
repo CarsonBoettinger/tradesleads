@@ -62,7 +62,7 @@ export async function GET(_request: Request, context: Ctx) {
 }
 
 export async function PATCH(request: Request, context: Ctx) {
-  const crossOrigin = rejectCrossOrigin(request);
+  const crossOrigin = await rejectCrossOrigin(request);
   if (crossOrigin) return crossOrigin;
 
   const session = await requireDashboardUser();
@@ -93,8 +93,20 @@ export async function PATCH(request: Request, context: Ctx) {
     if (session.profile.role !== "staff") {
       return Response.json({ error: "Staff only." }, { status: 403 });
     }
-    await publishBrand(id);
-    return Response.json({ ok: true });
+    try {
+      await publishBrand(id);
+      return Response.json({ ok: true });
+    } catch (error) {
+      return Response.json(
+        {
+          error:
+            error instanceof Error
+              ? error.message
+              : "Could not publish brand.",
+        },
+        { status: 400 },
+      );
+    }
   }
 
   if (raw.content || raw.seo) {
@@ -254,7 +266,7 @@ export async function PATCH(request: Request, context: Ctx) {
 }
 
 export async function DELETE(request: Request, context: Ctx) {
-  const crossOrigin = rejectCrossOrigin(request);
+  const crossOrigin = await rejectCrossOrigin(request);
   if (crossOrigin) return crossOrigin;
 
   const session = await requireDashboardUser();

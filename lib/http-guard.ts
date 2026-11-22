@@ -58,10 +58,10 @@ function isSameSiteFetch(request: Request): boolean {
  * missing Origin is only allowed when Sec-Fetch-Site is same-origin/same-site.
  * Cron/internal Bearer routes should omit requireOrigin (default).
  */
-export function rejectCrossOrigin(
+export async function rejectCrossOrigin(
   request: Request,
   options?: { requireOrigin?: boolean },
-): Response | null {
+): Promise<Response | null> {
   const origin = request.headers.get("origin");
   const requireOrigin =
     options?.requireOrigin === true && process.env.NODE_ENV === "production";
@@ -74,8 +74,44 @@ export function rejectCrossOrigin(
   }
 
   if (allowedOrigins().has(origin)) return null;
+  if (isAllowedSiteTenantOrigin(origin)) return null;
+  if (await isAllowedCustomDomainOrigin(origin)) return null;
 
   return Response.json({ error: "Forbidden." }, { status: 403 });
+}
+
+/** Allow {slug}.sites.* brand hosts (exact sites root is already in the set). */
+function isAllowedSiteTenantOrigin(origin: string): boolean {
+  try {
+    const url = new URL(origin);
+    const host = url.hostname.toLowerCase();
+    const sitesRoot = (
+      process.env.NEXT_PUBLIC_SITES_ROOT_HOST?.trim() || ""
+    ).toLowerCase().replace(/:\d+$/, "");
+    if (sitesRoot && host.endsWith(`.${sitesRoot}`) && !host.slice(0, -sitesRoot.length - 1).includes(".")) {
+      return true;
+    }
+    // kalvez.com → *.sites.kalvez.com (and local *.sites.localhost)
+    if (/^[a-z0-9-]+\.sites\./i.test(host)) return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/** Allow live client custom domains for site form posts. */
+async function isAllowedCustomDomainOrigin(origin: string): Promise<boolean> {
+  try {
+    const url = new URL(origin);
+    const host = url.hostname.toLowerCase();
+    const { lookupSlugByCustomDomain } = await import(
+      "@/lib/sites/domain-lookup"
+    );
+    const slug = await lookupSlugByCustomDomain(host);
+    return Boolean(slug);
+  } catch {
+    return false;
+  }
 }
 
 export function tooManyRequests(

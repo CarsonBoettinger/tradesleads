@@ -35,7 +35,8 @@ export type LeadChannel =
   | "free_demo"
   | "presence_report"
   | "manual"
-  | "import";
+  | "import"
+  | "phone";
 
 export type DemoLeadRow = {
   first_name: string;

@@ -20,7 +20,7 @@ import { verifyTurnstile } from "@/lib/security/turnstile";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: Request) {
-  const crossOrigin = rejectCrossOrigin(request, { requireOrigin: true });
+  const crossOrigin = await rejectCrossOrigin(request, { requireOrigin: true });
   if (crossOrigin) return crossOrigin;
 
   const limited = await enforceRateLimit({

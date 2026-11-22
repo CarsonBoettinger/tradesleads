@@ -7,6 +7,13 @@ export type BrandStatus =
   | "published"
   | "failed";
 
+export type DomainStatus =
+  | "none"
+  | "pending_dns"
+  | "pending_ssl"
+  | "live"
+  | "error";
+
 export type GenerationJobStatus = "queued" | "running" | "ready" | "failed";
 
 export type GenerationPhase =
@@ -60,6 +67,12 @@ export type Brand = {
   maps_uri: string | null;
   status: BrandStatus;
   created_by: string | null;
+  custom_domain: string | null;
+  custom_domain_www: boolean;
+  domain_status: DomainStatus;
+  domain_error: string | null;
+  domain_verified_at: string | null;
+  ssl_provisioned_at: string | null;
 };
 
 export type BrandAsset = {

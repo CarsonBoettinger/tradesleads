@@ -57,8 +57,14 @@ export function Hero() {
               All-in-one AI marketing
             </p>
             <h1 className="mt-6 max-w-2xl text-[2.35rem] leading-[1.08] font-extrabold tracking-[-0.02em] text-cocoa sm:text-5xl lg:text-6xl">
-              <span className="block">The AI platform for</span>
-              <HeroRotatingPhrase />
+              <span className="sr-only">
+                The AI platform that gets trade businesses more jobs from
+                Google.
+              </span>
+              <span aria-hidden="true">
+                <span className="block">The AI platform for</span>
+                <HeroRotatingPhrase />
+              </span>
             </h1>
             <p className="mt-6 max-w-xl text-[19px] leading-[1.6] text-muted sm:text-[21px]">
               Kalvez is the AI platform that grows your Google visibility,
@@ -99,12 +105,20 @@ export function Hero() {
                 <span className="grid size-8 place-items-center rounded-full bg-[#FDE8D8] text-foreman">
                   <BellIcon />
                 </span>
-                <p className="text-[15px] font-extrabold tracking-[-0.01em] text-cocoa">
-                  Jobs coming in
-                </p>
+                <div>
+                  <p className="text-[12px] font-bold tracking-[0.08em] text-muted uppercase">
+                    Example dashboard
+                  </p>
+                  <p className="text-[15px] font-extrabold tracking-[-0.01em] text-cocoa">
+                    Jobs coming in
+                  </p>
+                </div>
               </div>
 
-              <ul className="flex flex-col gap-1" aria-label="Live job activity">
+              <ul
+                className="flex flex-col gap-1"
+                aria-label="Example dashboard showing sample job activity"
+              >
                 {feed.map((item, index) => (
                   <li
                     key={item.name}
@@ -113,7 +127,7 @@ export function Hero() {
                     <span className="relative size-10 shrink-0 overflow-hidden rounded-full ring-2 ring-white">
                       <Image
                         src={item.avatar}
-                        alt=""
+                        alt={`Portrait of ${item.name}`}
                         fill
                         sizes="40px"
                         className="object-cover"

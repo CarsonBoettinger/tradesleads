@@ -10,7 +10,7 @@ import {
 import { createServerSupabase } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
-  const crossOrigin = rejectCrossOrigin(request);
+  const crossOrigin = await rejectCrossOrigin(request);
   if (crossOrigin) return crossOrigin;
 
   const session = await requireDashboardUser();

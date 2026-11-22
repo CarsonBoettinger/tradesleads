@@ -3,8 +3,8 @@ export function stripEmDashes(value: string): string {
   return value
     .replace(/(\d)\u2014(\d)/g, "$1-$2") // phone-style em dash
     .replace(/(\d)\u2013(\d)/g, "$1-$2") // phone-style en dash
-    .replace(/\u2014/g, ",") // em dash —
-    .replace(/\u2013/g, "-") // en dash –
+    .replace(/\u2014/g, ",") // em dash
+    .replace(/\u2013/g, "-") // en dash
     .replace(/(\d)--(\d)/g, "$1-$2")
     .replace(/--+/g, ",")
     .replace(/\s*,\s*,+/g, ",")

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { zonedTimeToUtc } from "@/lib/social/schedule";
 import type {
   SocialPlatform,
   SocialPost,
@@ -54,7 +55,7 @@ const SELECT =
 
 export async function listPostsForBrand(
   brandId: string,
-  limit = 60,
+  limit = 120,
 ): Promise<SocialPost[]> {
   const admin = getSupabaseAdmin();
   const { data, error } = await admin
@@ -217,4 +218,73 @@ export async function listRecentCaptions(
   return ((data as { caption: string }[] | null) ?? [])
     .map((r) => r.caption)
     .filter(Boolean);
+}
+
+/** Half-open UTC range [start, end) covering a calendar month in `timeZone`. */
+export function monthRangeUtc(
+  year: number,
+  monthIndex: number,
+  timeZone: string,
+): { startIso: string; endIso: string } {
+  const start = zonedTimeToUtc(
+    { year, month: monthIndex + 1, day: 1, hour: 0, minute: 0, second: 0 },
+    timeZone,
+  );
+  const endMonth = monthIndex === 11 ? 0 : monthIndex + 1;
+  const endYear = monthIndex === 11 ? year + 1 : year;
+  const end = zonedTimeToUtc(
+    {
+      year: endYear,
+      month: endMonth + 1,
+      day: 1,
+      hour: 0,
+      minute: 0,
+      second: 0,
+    },
+    timeZone,
+  );
+  return { startIso: start.toISOString(), endIso: end.toISOString() };
+}
+
+export async function bulkUpdateMonthPosts(input: {
+  brandId: string;
+  year: number;
+  monthIndex: number;
+  timeZone: string;
+  action: "approve" | "reject";
+  approvedBy?: string;
+}): Promise<{ updated: number }> {
+  const admin = getSupabaseAdmin();
+  const { startIso, endIso } = monthRangeUtc(
+    input.year,
+    input.monthIndex,
+    input.timeZone,
+  );
+
+  const now = new Date().toISOString();
+  const update: Record<string, unknown> =
+    input.action === "approve"
+      ? {
+          status: "scheduled",
+          approved_by: input.approvedBy ?? null,
+          approved_at: now,
+          error_message: null,
+          updated_at: now,
+        }
+      : {
+          status: "rejected",
+          updated_at: now,
+        };
+
+  const { data, error } = await admin
+    .from("social_posts")
+    .update(update)
+    .eq("brand_id", input.brandId)
+    .eq("status", "pending_approval")
+    .gte("scheduled_for", startIso)
+    .lt("scheduled_for", endIso)
+    .select("id");
+
+  if (error) throw new Error(error.message);
+  return { updated: (data ?? []).length };
 }

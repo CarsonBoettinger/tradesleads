@@ -148,7 +148,7 @@ export const TurnstileWidget = forwardRef<
       },
       async getToken() {
         if (!siteKey) {
-          // Dev without Turnstile configured — allow submits.
+          // Dev without Turnstile configured - allow submits.
           return "";
         }
         if (!ready || !widgetIdRef.current || !window.turnstile) {

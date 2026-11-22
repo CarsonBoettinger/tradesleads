@@ -3,14 +3,28 @@ import "server-only";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { dashboardUrl } from "@/lib/hosts";
 import { sendClientInviteEmail } from "@/lib/sites/client-invite-email";
-import { uniqueBrandSlug } from "@/lib/sites/slug";
+import { uniqueOpaqueSiteSlug } from "@/lib/sites/slug";
 import type {
   Brand,
   BrandAsset,
+  DomainStatus,
   GenerationJob,
   Profile,
   SiteConfig,
 } from "@/lib/sites/types";
+
+function normalizeBrand(row: Brand | null): Brand | null {
+  if (!row) return null;
+  return {
+    ...row,
+    custom_domain: row.custom_domain ?? null,
+    custom_domain_www: row.custom_domain_www ?? true,
+    domain_status: row.domain_status ?? "none",
+    domain_error: row.domain_error ?? null,
+    domain_verified_at: row.domain_verified_at ?? null,
+    ssl_provisioned_at: row.ssl_provisioned_at ?? null,
+  };
+}
 
 export async function listBrandsForProfile(profile: Profile): Promise<Brand[]> {
   const admin = getSupabaseAdmin();
@@ -21,7 +35,9 @@ export async function listBrandsForProfile(profile: Profile): Promise<Brand[]> {
       .select("*")
       .order("created_at", { ascending: false });
     if (error) throw error;
-    return (data ?? []) as Brand[];
+    return ((data ?? []) as Brand[])
+      .map((row) => normalizeBrand(row))
+      .filter((row): row is Brand => Boolean(row));
   }
 
   const { data: memberships, error: memberError } = await admin
@@ -39,7 +55,9 @@ export async function listBrandsForProfile(profile: Profile): Promise<Brand[]> {
     .in("id", ids)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return (data ?? []) as Brand[];
+  return ((data ?? []) as Brand[])
+    .map((row) => normalizeBrand(row))
+    .filter((row): row is Brand => Boolean(row));
 }
 
 export async function getBrandById(id: string): Promise<Brand | null> {
@@ -50,7 +68,7 @@ export async function getBrandById(id: string): Promise<Brand | null> {
     .eq("id", id)
     .maybeSingle();
   if (error) throw error;
-  return (data as Brand | null) ?? null;
+  return normalizeBrand(data as Brand | null);
 }
 
 export async function getBrandBySlug(slug: string): Promise<Brand | null> {
@@ -61,7 +79,37 @@ export async function getBrandBySlug(slug: string): Promise<Brand | null> {
     .eq("slug", slug)
     .maybeSingle();
   if (error) throw error;
-  return (data as Brand | null) ?? null;
+  return normalizeBrand(data as Brand | null);
+}
+
+export async function getBrandByCustomDomain(
+  hostname: string,
+): Promise<Brand | null> {
+  const host = hostname.toLowerCase().replace(/:\d+$/, "").replace(/\.$/, "");
+  if (!host) return null;
+
+  const admin = getSupabaseAdmin();
+  const withoutWww = host.startsWith("www.") ? host.slice(4) : host;
+  const withWww = host.startsWith("www.") ? host : `www.${host}`;
+
+  const { data, error } = await admin
+    .from("brands")
+    .select("*")
+    .or(
+      `custom_domain.eq."${withoutWww}",custom_domain.eq."${withWww}",custom_domain.eq."${host}"`,
+    )
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return normalizeBrand(data as Brand | null);
+}
+
+export function brandDomainHosts(brand: Pick<Brand, "custom_domain" | "custom_domain_www">): string[] {
+  const domain = brand.custom_domain?.trim().toLowerCase();
+  if (!domain) return [];
+  const apex = domain.replace(/^www\./, "");
+  if (brand.custom_domain_www === false) return [apex];
+  return [apex, `www.${apex}`];
 }
 
 export async function userCanAccessBrand(
@@ -89,7 +137,7 @@ export async function createBrandFromPlace(input: {
   createdBy: string;
 }): Promise<Brand> {
   const admin = getSupabaseAdmin();
-  const slug = await uniqueBrandSlug(input.name, async (candidate) => {
+  const slug = await uniqueOpaqueSiteSlug(async (candidate) => {
     const { data } = await admin
       .from("brands")
       .select("id")
@@ -109,6 +157,8 @@ export async function createBrandFromPlace(input: {
       lng: input.lng ?? null,
       trade: input.trade ?? null,
       status: "draft",
+      domain_status: "none",
+      custom_domain_www: true,
       created_by: input.createdBy,
     })
     .select("*")
@@ -126,7 +176,7 @@ export async function createBrandFromPlace(input: {
     qa: {},
   });
 
-  return data as Brand;
+  return normalizeBrand(data as Brand)!;
 }
 
 export async function getSiteConfig(brandId: string): Promise<SiteConfig | null> {
@@ -197,6 +247,20 @@ export async function getLatestJob(brandId: string): Promise<GenerationJob | nul
 }
 
 export async function publishBrand(brandId: string) {
+  const brand = await getBrandById(brandId);
+  if (!brand) throw new Error("Brand not found.");
+  if (!brand.custom_domain) {
+    throw new Error("Set a custom domain before publishing.");
+  }
+  if (brand.domain_status !== "live") {
+    throw new Error(
+      "Custom domain must be live (DNS verified and SSL provisioned) before publishing.",
+    );
+  }
+  if (brand.status !== "ready" && brand.status !== "published") {
+    throw new Error("Website must be ready before publishing.");
+  }
+
   const admin = getSupabaseAdmin();
   const now = new Date().toISOString();
   const { error: brandError } = await admin
@@ -210,6 +274,51 @@ export async function publishBrand(brandId: string) {
     .update({ published_at: now, updated_at: now })
     .eq("brand_id", brandId);
   if (configError) throw configError;
+}
+
+export async function updateBrandDomain(input: {
+  brandId: string;
+  customDomain: string | null;
+  customDomainWww?: boolean;
+  domainStatus?: DomainStatus;
+  domainError?: string | null;
+  domainVerifiedAt?: string | null;
+  sslProvisionedAt?: string | null;
+}) {
+  const admin = getSupabaseAdmin();
+  const patch: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  };
+
+  if (input.customDomain !== undefined) {
+    patch.custom_domain = input.customDomain;
+  }
+  if (input.customDomainWww !== undefined) {
+    patch.custom_domain_www = input.customDomainWww;
+  }
+  if (input.domainStatus !== undefined) {
+    patch.domain_status = input.domainStatus;
+  }
+  if (input.domainError !== undefined) {
+    patch.domain_error = input.domainError;
+  }
+  if (input.domainVerifiedAt !== undefined) {
+    patch.domain_verified_at = input.domainVerifiedAt;
+  }
+  if (input.sslProvisionedAt !== undefined) {
+    patch.ssl_provisioned_at = input.sslProvisionedAt;
+  }
+
+  const { data, error } = await admin
+    .from("brands")
+    .update(patch)
+    .eq("id", input.brandId)
+    .select("*")
+    .single();
+  if (error || !data) {
+    throw new Error(error?.message ?? "Could not update domain.");
+  }
+  return normalizeBrand(data as Brand)!;
 }
 
 /** Staff-only hard delete: storage objects first, then brand (DB cascades). */

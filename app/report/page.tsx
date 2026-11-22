@@ -1,18 +1,23 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 import { ReportFlow } from "@/components/report/report-flow";
+import {
+  ReportMarketing,
+  reportFaqs,
+} from "@/components/report/report-marketing";
 import { Container } from "@/components/ui";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import {
   breadcrumbJsonLd,
   buildPageMetadata,
+  faqJsonLd,
   webPageJsonLd,
 } from "@/lib/seo";
 
 const title = "Free digital presence report";
 const description =
-  "Free digital presence report for trade businesses - search results, website experience, and local listings.";
+  "Free digital presence report for trade businesses - Map Pack, website experience, Google listing strength, competitors, and a prioritized score card.";
 
 export const metadata: Metadata = buildPageMetadata({
   title,
@@ -23,6 +28,7 @@ export const metadata: Metadata = buildPageMetadata({
     "Google Business Profile report",
     "contractor website audit",
     "trade business digital presence",
+    "Map Pack report for contractors",
   ],
 });
 
@@ -42,10 +48,12 @@ export default function ReportPage() {
           { name: "Free report", path: "/report" },
         ])}
       />
+      <JsonLd data={faqJsonLd(reportFaqs)} />
       <SiteHeader />
       <main id="content" className="pb-20 pt-10 sm:pb-28 sm:pt-14">
         <Container>
           <ReportFlow />
+          <ReportMarketing />
         </Container>
       </main>
       <SiteFooter />

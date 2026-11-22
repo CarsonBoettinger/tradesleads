@@ -53,7 +53,7 @@ async function runFfmpeg(args: string[]) {
   });
 }
 
-/** Ken Burns style MP4 from a still — reliable fallback when Veo is unavailable. */
+/** Ken Burns style MP4 from a still - reliable fallback when Veo is unavailable. */
 async function renderKenBurnsMp4(imageBuffer: Buffer): Promise<Buffer | null> {
   const dir = await mkdtemp(join(tmpdir(), "kalvez-hero-"));
   const inputPath = join(dir, "hero-still.jpg");

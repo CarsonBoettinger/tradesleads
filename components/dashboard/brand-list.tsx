@@ -101,7 +101,7 @@ export function BrandList({
                       rel="noreferrer"
                       className="mt-2 inline-block text-sm font-semibold text-foreman"
                     >
-                      {brand.slug}.sites…
+                      Open preview
                     </a>
                   )}
                 </div>

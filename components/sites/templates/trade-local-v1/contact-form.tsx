@@ -63,7 +63,7 @@ export function SiteContactForm({
         return;
       }
       setStatus("ok");
-      setMessage("Thanks — we received your request.");
+      setMessage("Thanks - we received your request.");
       form.reset();
       turnstileRef.current?.reset();
     } catch {

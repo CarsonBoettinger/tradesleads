@@ -124,7 +124,7 @@ export function BusinessAutocomplete({
       return;
     }
 
-    // Fake loading while the user is still typing — no Places call yet.
+    // Fake loading while the user is still typing - no Places call yet.
     setLoading(true);
     setOpen(true);
     setShowDemoFallback(false);
@@ -344,8 +344,8 @@ export function BusinessAutocomplete({
                 See a sample report for {value.trim() || "your business"}
               </p>
               <p className="mt-0.5 text-sm text-muted">
-                We couldn’t find a Google listing with an address attached —
-                that alone costs calls. Try the demo report.
+                We couldn’t find a Google listing with an address attached.
+                That alone costs calls. Try the demo report.
               </p>
             </button>
           ) : null}

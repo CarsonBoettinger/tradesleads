@@ -1,4 +1,5 @@
 import { getSiteUrl } from "@/lib/site";
+import type { Brand } from "@/lib/sites/types";
 
 export function getDashboardHost() {
   return (
@@ -39,6 +40,21 @@ export function isDashboardHost(hostname: string) {
   return hostname === expected || hostname.startsWith("dashboard.");
 }
 
+export function isMarketingHost(hostname: string) {
+  try {
+    const site = new URL(getSiteUrl()).hostname.toLowerCase().replace(/^www\./, "");
+    const host = hostname.toLowerCase().replace(/^www\./, "");
+    if (host === site) return true;
+  } catch {
+    // ignore
+  }
+  const sitesRoot = getSitesRootHost().toLowerCase().replace(/:\d+$/, "");
+  if (hostname === sitesRoot) return true;
+  if (hostname === "localhost" || hostname === "127.0.0.1") return true;
+  if (hostname.endsWith(".netlify.app")) return true;
+  return false;
+}
+
 /** Returns site slug when host is {slug}.sites.* */
 export function siteSlugFromHost(hostname: string): string | null {
   const sitesRoot = getSitesRootHost().toLowerCase().replace(/:\d+$/, "");
@@ -73,6 +89,38 @@ export function brandPreviewUrl(slug: string) {
   } catch {
     return `https://${slug}.${sitesRoot}`;
   }
+}
+
+/** Canonical public URL: custom domain when live+published, else opaque preview. */
+export function brandCanonicalUrl(
+  brand: Pick<
+    Brand,
+    "slug" | "status" | "custom_domain" | "custom_domain_www" | "domain_status"
+  >,
+) {
+  if (
+    brand.status === "published" &&
+    brand.domain_status === "live" &&
+    brand.custom_domain
+  ) {
+    const apex = brand.custom_domain.replace(/^www\./, "");
+    const host =
+      brand.custom_domain_www === false ? apex : `www.${apex}`;
+    return `https://${host}`;
+  }
+  return brandPreviewUrl(brand.slug);
+}
+
+export function brandSiteIsIndexable(
+  brand: Pick<Brand, "status" | "domain_status" | "custom_domain">,
+  opts: { onCustomDomain: boolean },
+) {
+  return (
+    opts.onCustomDomain &&
+    brand.status === "published" &&
+    brand.domain_status === "live" &&
+    Boolean(brand.custom_domain)
+  );
 }
 
 export function dashboardUrl(path = "/") {

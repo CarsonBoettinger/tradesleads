@@ -69,7 +69,7 @@ function getRedis(): Redis | null {
     if (process.env.NODE_ENV === "production" && !warnedMissingUpstash) {
       warnedMissingUpstash = true;
       console.warn(
-        "[rate-limit] UPSTASH_REDIS_REST_URL/TOKEN unset — falling back to in-memory limits (not durable across instances).",
+        "[rate-limit] UPSTASH_REDIS_REST_URL/TOKEN unset - falling back to in-memory limits (not durable across instances).",
       );
     }
     return null;

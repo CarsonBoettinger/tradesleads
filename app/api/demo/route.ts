@@ -11,7 +11,7 @@ import { verifyTurnstile } from "@/lib/security/turnstile";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: Request) {
-  const crossOrigin = rejectCrossOrigin(request, { requireOrigin: true });
+  const crossOrigin = await rejectCrossOrigin(request, { requireOrigin: true });
   if (crossOrigin) return crossOrigin;
 
   const limited = await enforceRateLimit({
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   const parsedBody = await readJsonBody(request, 16_384);
   if (!parsedBody.ok) return parsedBody.response;
 
-  // Bots that fill the honeypot get a quiet success — no DB write / Telegram.
+  // Bots that fill the honeypot get a quiet success - no DB write / Telegram.
   if (honeypotTripped(parsedBody.body)) {
     return Response.json({ ok: true, duplicate: false });
   }

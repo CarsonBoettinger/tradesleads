@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { COMPANY_EMAIL } from "@/lib/company";
 import { absoluteUrl, getSiteUrl } from "@/lib/site";
 
 export const siteName = "Kalvez";
@@ -155,7 +156,8 @@ export function organizationJsonLd() {
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "sales",
-      url: absoluteUrl("/free-demo"),
+      email: COMPANY_EMAIL,
+      url: absoluteUrl("/contact"),
       availableLanguage: ["English"],
     },
   };
@@ -238,13 +240,15 @@ export function tradeServiceJsonLd(trade: {
   description: string;
   slug: string;
   headline: string;
+  pageTitle?: string;
 }) {
   const url = absoluteUrl(`/trades/${trade.slug}`);
+  const name = trade.pageTitle ?? trade.headline;
   return {
     "@context": "https://schema.org",
     "@type": "Service",
     "@id": `${url}#service`,
-    name: `Local growth for ${trade.name}`,
+    name,
     serviceType: `Website and local SEO for ${trade.name.toLowerCase()}`,
     description: trade.description,
     url,

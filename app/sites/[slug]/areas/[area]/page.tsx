@@ -12,6 +12,7 @@ import {
   getSiteConfig,
 } from "@/lib/sites/brands";
 import { getGeneratedSiteBasePath } from "@/lib/sites/paths";
+import { brandSiteRobots } from "@/lib/sites/site-meta";
 import type { SiteContent } from "@/lib/sites/types";
 
 export const instant = false;
@@ -38,10 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: copy.title,
     description: copy.description,
-    robots:
-      brand.status === "published"
-        ? { index: true, follow: true }
-        : { index: false, follow: false },
+    robots: await brandSiteRobots(brand),
   };
 }
 

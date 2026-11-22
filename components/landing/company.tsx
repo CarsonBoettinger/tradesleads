@@ -44,6 +44,14 @@ export function Company() {
             </li>
           ))}
         </ul>
+        <div className="mt-10">
+          <a
+            href="/about"
+            className="inline-flex h-[52px] cursor-pointer items-center justify-center rounded-[10px] border-2 border-white/25 bg-transparent px-6 text-center text-[17px] font-bold whitespace-nowrap text-cream transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreman"
+          >
+            Why Kalvez exists
+          </a>
+        </div>
       </Container>
     </section>
   );

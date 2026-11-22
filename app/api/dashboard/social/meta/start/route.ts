@@ -6,7 +6,7 @@ import type { SocialPlatform } from "@/lib/social/types";
 import { enforceRateLimit, rejectCrossOrigin } from "@/lib/http-guard";
 
 export async function GET(request: Request) {
-  const crossOrigin = rejectCrossOrigin(request);
+  const crossOrigin = await rejectCrossOrigin(request);
   if (crossOrigin) return crossOrigin;
 
   const session = await requireDashboardUser();

@@ -13,7 +13,7 @@ type Ctx = { params: Promise<{ brandId: string }> };
 export const maxDuration = 300;
 
 export async function POST(request: Request, context: Ctx) {
-  const crossOrigin = rejectCrossOrigin(request);
+  const crossOrigin = await rejectCrossOrigin(request);
   if (crossOrigin) return crossOrigin;
 
   const session = await requireDashboardUser();

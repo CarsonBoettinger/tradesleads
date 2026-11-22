@@ -91,7 +91,7 @@ export function SocialCadenceSettings({ brandId }: { brandId: string }) {
       <h3 className="font-extrabold">Social posting</h3>
       <p className="mt-1 text-sm text-muted">
         How often we draft posts, and which accounts stay connected. Change
-        these anytime — the Socials calendar uses them.
+        these anytime - the Socials calendar uses them.
       </p>
 
       {message ? (
@@ -115,7 +115,7 @@ export function SocialCadenceSettings({ brandId }: { brandId: string }) {
         >
           {SOCIAL_FREQUENCY_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
-              {opt.label} — {opt.hint}
+              {opt.label} - {opt.hint}
             </option>
           ))}
         </select>

@@ -1,4 +1,4 @@
-import { Container, Eyebrow } from "@/components/ui";
+import { Container, CtaLink, Eyebrow } from "@/components/ui";
 
 const steps = [
   {
@@ -44,6 +44,11 @@ export function How() {
             </li>
           ))}
         </ol>
+        <div className="mt-10">
+          <CtaLink href="/how-it-works" variant="ghost">
+            See the full process
+          </CtaLink>
+        </div>
       </Container>
     </section>
   );

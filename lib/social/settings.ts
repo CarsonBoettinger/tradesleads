@@ -38,7 +38,7 @@ const DEFAULTS: Omit<SocialPostSettings, "id" | "brandId"> = {
   timezone: "America/Toronto",
   preferredHour: 10,
   enabled: true,
-  lookAheadDays: 7,
+  lookAheadDays: 30,
   cadenceConfirmed: false,
 };
 

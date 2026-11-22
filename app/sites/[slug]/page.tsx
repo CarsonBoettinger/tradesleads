@@ -9,9 +9,12 @@ import {
   getBrandProfile,
   getSiteConfig,
 } from "@/lib/sites/brands";
-import { brandPreviewUrl } from "@/lib/hosts";
 import { normalizeOpeningHours } from "@/lib/sites/hours";
 import { getGeneratedSiteBasePath } from "@/lib/sites/paths";
+import {
+  brandSiteCanonical,
+  brandSiteRobots,
+} from "@/lib/sites/site-meta";
 
 export const instant = false;
 
@@ -27,18 +30,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = config?.seo?.title || brand.name;
   const description =
     config?.seo?.description || `${brand.name} local service website`;
+  const canonical = brandSiteCanonical(brand);
 
   return {
     title,
     description,
-    robots:
-      brand.status === "published"
-        ? { index: true, follow: true }
-        : { index: false, follow: false },
+    robots: await brandSiteRobots(brand),
+    alternates: { canonical },
     openGraph: {
       title: config?.seo?.ogTitle || title,
       description: config?.seo?.ogDescription || description,
-      url: brandPreviewUrl(slug),
+      url: canonical,
     },
   };
 }
@@ -72,12 +74,13 @@ export default async function GeneratedSitePage({ params }: Props) {
       description: row.value,
     }));
 
+  const canonical = brandSiteCanonical(brand);
   const localBusiness = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: brand.name,
     telephone: brand.phone ?? undefined,
-    url: brandPreviewUrl(brand.slug),
+    url: canonical,
     address: brand.address
       ? {
           "@type": "PostalAddress",

@@ -172,7 +172,7 @@ export async function generateBlogPost(options?: {
     trade: topic.trade,
     primary_keyword: topic.primaryKeyword,
     secondary_keywords: topic.secondaryKeywords,
-    meta_title: `${topic.title} | Kalvez`,
+    meta_title: topic.title,
     meta_description: excerpt,
     status: "published",
     source: "agent",

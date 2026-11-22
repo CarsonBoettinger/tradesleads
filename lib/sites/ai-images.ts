@@ -79,6 +79,12 @@ export async function generateAndStoreAiPhotos(input: {
   town: string | null;
   needed: number;
   startOrder: number;
+  /** Optional brand palette hexes — woven into scene color cues only (no text/logos). */
+  brandColors?: {
+    primary?: string;
+    secondary?: string;
+    accent?: string;
+  } | null;
 }): Promise<
   Array<Record<string, unknown> & { altText?: string | null; kind?: string }>
 > {
@@ -87,12 +93,23 @@ export async function generateAndStoreAiPhotos(input: {
   const admin = getSupabaseAdmin();
   const trade = (input.trade ?? "home services").toLowerCase();
   const place = input.town ?? "Ontario";
+  const colorCue = [
+    input.brandColors?.primary,
+    input.brandColors?.secondary,
+    input.brandColors?.accent,
+  ]
+    .filter(Boolean)
+    .slice(0, 3)
+    .join(", ");
+  const paletteHint = colorCue
+    ? ` Subtle environmental color accents inspired by brand palette ${colorCue} (truck accents, door trim, or landscaping tones only — never text, logos, or watermark).`
+    : "";
   const prompts = [
-    `Photorealistic wide exterior photo of a finished custom home built by a ${trade} in ${place}, Ontario, Canada. Golden hour, landscaped lawn, no text, no logos, no watermarks, no UI, high detail.`,
-    `Photorealistic street-view photo of a completed residential house project in ${place}. Natural daylight, realistic materials, no people faces, no text, no logos.`,
-    `Photorealistic close-up of quality ${trade} craftsmanship on a finished home exterior in ${place}. No text, no logos, no people faces.`,
-    `Photorealistic unmarked work truck for a local ${trade} company parked at a residential driveway in ${place}. No readable text or logos.`,
-    `Photorealistic active ${trade} job site with clean framing or finished siding on a home in ${place}. Natural light, no text, no logos.`,
+    `Photorealistic wide exterior photo of a finished custom home built by a ${trade} in ${place}, Ontario, Canada. Golden hour, landscaped lawn, no text, no logos, no watermarks, no UI, high detail.${paletteHint}`,
+    `Photorealistic street-view photo of a completed residential house project in ${place}. Natural daylight, realistic materials, no people faces, no text, no logos.${paletteHint}`,
+    `Photorealistic close-up of quality ${trade} craftsmanship on a finished home exterior in ${place}. No text, no logos, no people faces.${paletteHint}`,
+    `Photorealistic unmarked work truck for a local ${trade} company parked at a residential driveway in ${place}. No readable text or logos.${paletteHint}`,
+    `Photorealistic active ${trade} job site with clean framing or finished siding on a home in ${place}. Natural light, no text, no logos.${paletteHint}`,
   ];
 
   const stored = [];

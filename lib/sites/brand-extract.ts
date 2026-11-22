@@ -22,7 +22,7 @@ export function deriveTheme(
   payload: BrandProfilePayload,
   logoColors: string[] = [],
 ): SiteTheme {
-  // Logo colors win — CSS scrapes often pick random greens/yellows from themes.
+  // Logo colors win - CSS scrapes often pick random greens/yellows from themes.
   const primary = pickPrimaryColor(
     logoColors.length > 0
       ? logoColors

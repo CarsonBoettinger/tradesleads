@@ -17,7 +17,7 @@ function authorized(request: Request) {
   const cronSecret = process.env.CRON_SECRET;
   const header = request.headers.get("authorization");
   const bearer = header?.startsWith("Bearer ") ? header.slice(7) : null;
-  // Query-string tokens leak via logs/Referer — production requires Bearer only.
+  // Query-string tokens leak via logs/Referer - production requires Bearer only.
   const queryToken =
     process.env.NODE_ENV === "production"
       ? null

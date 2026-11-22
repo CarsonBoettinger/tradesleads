@@ -95,7 +95,7 @@ export function SiteLocationHours({
                     >
                       <dt className="font-semibold">{row.label}</dt>
                       <dd className="text-right text-[color:var(--site-muted)]">
-                        {row.value || "—"}
+                        {row.value || "-"}
                       </dd>
                     </div>
                   ))}

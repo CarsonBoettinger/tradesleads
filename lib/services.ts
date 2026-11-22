@@ -26,7 +26,7 @@ export const services: ServicePage[] = [
     description:
       "Earn relevant backlinks for your trade business so Google trusts your site and sends more local customers your way.",
     summary:
-      "Quality links from real local and trade sites tell Google you are the crew to call. We build backlinks that support your rankings—not spam that gets ignored.",
+      "Quality links from real local and trade sites tell Google you are the crew to call. We build backlinks that support your rankings - not spam that gets ignored.",
     searchExample: "plumber near me",
     problemHeading: "Why trade sites stall without real backlinks",
     outcomesHeading: "Backlinks that support booked jobs",
@@ -53,7 +53,7 @@ export const services: ServicePage[] = [
       },
       {
         title: "Authority that compounds",
-        body: "Each solid backlink supports the pages that bring calls—service pages, town pages, and your home page.",
+        body: "Each solid backlink supports the pages that bring calls - service pages, town pages, and your home page.",
       },
       {
         title: "No black-hat shortcuts",
@@ -98,7 +98,7 @@ export const services: ServicePage[] = [
     headline: "Content creation that gets trades found",
     pageTitle: "Content creation for contractors",
     description:
-      "Website and local content creation for contractors—clear pages, service copy, and updates that help customers choose you.",
+      "Website and local content creation for contractors - clear pages, service copy, and updates that help customers choose you.",
     summary:
       "Empty or stale pages do not win jobs. We create trade-ready content for your site and listings so homeowners understand what you do and why to call.",
     searchExample: "AC repair near me",
@@ -109,7 +109,7 @@ export const services: ServicePage[] = [
     pains: [
       {
         title: "Generic filler copy",
-        body: "Stock paragraphs about “quality service” do not answer what a homeowner needs fixed today—or why you are the right crew.",
+        body: "Stock paragraphs about “quality service” do not answer what a homeowner needs fixed today - or why you are the right crew.",
       },
       {
         title: "Nothing to publish",
@@ -123,7 +123,7 @@ export const services: ServicePage[] = [
     outcomes: [
       {
         title: "Service and town pages",
-        body: "Clear pages for the jobs you actually do and the places you serve—written so people and search engines both get it.",
+        body: "Clear pages for the jobs you actually do and the places you serve - written so people and search engines both get it.",
       },
       {
         title: "Fresh site updates",
@@ -148,7 +148,7 @@ export const services: ServicePage[] = [
       {
         question: "Is blog content still worth it?",
         answer:
-          "Yes when it answers real questions—like when to replace a water heater. Random posts that never match searches waste time.",
+          "Yes when it answers real questions - like when to replace a water heater. Random posts that never match searches waste time.",
       },
       {
         question: "How is this different from content marketing?",
@@ -201,7 +201,7 @@ export const services: ServicePage[] = [
       },
       {
         title: "Distribution that matters",
-        body: "Pages, posts, and updates work together with SEO and your Google profile—not as a side project.",
+        body: "Pages, posts, and updates work together with SEO and your Google profile - not as a side project.",
       },
       {
         title: "Trust before the phone rings",
@@ -212,7 +212,7 @@ export const services: ServicePage[] = [
       {
         question: "What is content marketing for trades?",
         answer:
-          "It is using useful website content—service pages, guides, FAQs, and updates—to attract local customers, build trust, and drive calls or bookings.",
+          "It is using useful website content - service pages, guides, FAQs, and updates - to attract local customers, build trust, and drive calls or bookings.",
       },
       {
         question: "How is it different from ads?",
@@ -261,7 +261,7 @@ export const services: ServicePage[] = [
       },
       {
         title: "Messy Google Business Profile",
-        body: "Wrong hours, thin categories, weak photos, and ignored reviews tell Google—and customers—you are not ready.",
+        body: "Wrong hours, thin categories, weak photos, and ignored reviews tell Google - and customers - you are not ready.",
       },
       {
         title: "One page for every town",
@@ -275,7 +275,7 @@ export const services: ServicePage[] = [
       },
       {
         title: "Town and service coverage",
-        body: "Pages that match how people search—trade, job type, and place—so you rank where you actually work.",
+        body: "Pages that match how people search - trade, job type, and place - so you rank where you actually work.",
       },
       {
         title: "Reviews and consistency",
@@ -320,7 +320,7 @@ export const services: ServicePage[] = [
     headline: "A CRM built around trade customers",
     pageTitle: "CRM for trade businesses",
     description:
-      "Customer relationship manager (CRM) for trade businesses—track leads, jobs, and follow-ups so fewer quotes go cold.",
+      "Customer relationship manager (CRM) for trade businesses - track leads, jobs, and follow-ups so fewer quotes go cold.",
     summary:
       "Leads die in text threads and sticky notes. A simple CRM keeps every inquiry, quote, and follow-up in one place so you book more of the work you already earned.",
     searchExample: "contractor CRM",
@@ -345,7 +345,7 @@ export const services: ServicePage[] = [
     outcomes: [
       {
         title: "One place for every lead",
-        body: "Calls, form fills, and quote requests land where you can see them—even when you are under a sink or on a roof.",
+        body: "Calls, form fills, and quote requests land where you can see them - even when you are under a sink or on a roof.",
       },
       {
         title: "Follow-ups that actually happen",
@@ -370,7 +370,7 @@ export const services: ServicePage[] = [
       {
         question: "Will this replace my job software?",
         answer:
-          "Kalvez focuses on growth and customer follow-through. We keep the CRM side practical for leads and relationships—not a full field-ops suite.",
+          "Kalvez focuses on growth and customer follow-through. We keep the CRM side practical for leads and relationships - not a full field-ops suite.",
       },
       {
         question: "How does CRM tie to more jobs from Google?",
@@ -399,7 +399,7 @@ export const services: ServicePage[] = [
     headline: "Automated review management that builds trust",
     pageTitle: "Automated review management",
     description:
-      "Automated review management for trades—ask for reviews after jobs, monitor feedback, and grow the ratings that win local searches.",
+      "Automated review management for trades - ask for reviews after jobs, monitor feedback, and grow the ratings that win local searches.",
     summary:
       "Reviews decide who gets the call. We help you ask at the right time, keep an eye on new feedback, and grow a profile that looks busy and trusted.",
     searchExample: "best HVAC company near me",
@@ -439,12 +439,12 @@ export const services: ServicePage[] = [
       {
         question: "What is automated review management?",
         answer:
-          "It is a system that prompts customers for reviews after jobs, tracks new feedback, and helps you respond—without relying on memory alone.",
+          "It is a system that prompts customers for reviews after jobs, tracks new feedback, and helps you respond - without relying on memory alone.",
       },
       {
         question: "Will this spam my customers?",
         answer:
-          "No. Requests should be timely, polite, and limited. The goal is a natural ask after good work—not endless nagging.",
+          "No. Requests should be timely, polite, and limited. The goal is a natural ask after good work - not endless nagging.",
       },
       {
         question: "Do reviews help SEO?",
@@ -473,7 +473,7 @@ export const services: ServicePage[] = [
     headline: "SEO that turns searches into booked jobs",
     pageTitle: "SEO for contractors",
     description:
-      "SEO for contractors and trade businesses—technical fixes, keyword-focused pages, and rankings that bring real local traffic.",
+      "SEO for contractors and trade businesses - technical fixes, keyword-focused pages, and rankings that bring real local traffic.",
     summary:
       "Search engine optimization is how the right customers find you before they call someone else. We fix what blocks rankings and build pages that earn the click.",
     searchExample: "roof repair estimate",
@@ -484,7 +484,7 @@ export const services: ServicePage[] = [
     pains: [
       {
         title: "Pages Google cannot use",
-        body: "Slow sites, thin copy, and messy structure make it hard to rank—even when the crew does great work.",
+        body: "Slow sites, thin copy, and messy structure make it hard to rank - even when the crew does great work.",
       },
       {
         title: "Wrong keywords",
@@ -506,14 +506,14 @@ export const services: ServicePage[] = [
       },
       {
         title: "Ongoing improvement",
-        body: "SEO is steady work—new pages, fixes, and content that keep you competitive month after month.",
+        body: "SEO is steady work - new pages, fixes, and content that keep you competitive month after month.",
       },
     ],
     faqs: [
       {
         question: "What is SEO for contractors?",
         answer:
-          "SEO (search engine optimization) is the work that helps your website show up when people search for your trade, services, and town—so they find you instead of a competitor.",
+          "SEO (search engine optimization) is the work that helps your website show up when people search for your trade, services, and town - so they find you instead of a competitor.",
       },
       {
         question: "How is SEO different from local SEO?",
@@ -547,9 +547,9 @@ export const services: ServicePage[] = [
     headline: "AEO so AI answers name your business",
     pageTitle: "Answer engine optimization (AEO)",
     description:
-      "Answer engine optimization (AEO) for trades—structure your site so AI answers, featured snippets, and voice results can recommend you.",
+      "Answer engine optimization (AEO) for trades - structure your site so AI answers, featured snippets, and voice results can recommend you.",
     summary:
-      "People ask ChatGPT, Google’s AI answers, and voice search who to call. AEO makes your content clear enough to be the answer—not just another blue link.",
+      "People ask ChatGPT, Google’s AI answers, and voice search who to call. AEO makes your content clear enough to be the answer - not just another blue link.",
     searchExample: "who is the best plumber in my area",
     problemHeading: "Why answer engines skip most trade sites",
     outcomesHeading: "Answer engine optimization that earns mentions",
@@ -562,7 +562,7 @@ export const services: ServicePage[] = [
       },
       {
         title: "No FAQ structure",
-        body: "Owners bury the useful details. Machines—and busy homeowners—need direct questions and direct answers.",
+        body: "Owners bury the useful details. Machines - and busy homeowners - need direct questions and direct answers.",
       },
       {
         title: "Invisible to new search habits",
@@ -621,9 +621,9 @@ export const services: ServicePage[] = [
     headline: "GEO so generative search cites your crew",
     pageTitle: "Generative engine optimization (GEO)",
     description:
-      "Generative engine optimization (GEO) for trades—earn citations in AI-generated search results that recommend who to hire.",
+      "Generative engine optimization (GEO) for trades - earn citations in AI-generated search results that recommend who to hire.",
     summary:
-      "Generative search writes answers from sources it trusts. GEO helps your trade business become one of those sources—so AI-assisted searchers hear your name.",
+      "Generative search writes answers from sources it trusts. GEO helps your trade business become one of those sources - so AI-assisted searchers hear your name.",
     searchExample: "recommend a local roofing company",
     problemHeading: "Why generative search overlooks good crews",
     outcomesHeading: "Generative engine optimization for local trades",
@@ -654,7 +654,7 @@ export const services: ServicePage[] = [
       },
       {
         title: "Stack with SEO and AEO",
-        body: "GEO works best when classic SEO and answer optimization are already in place—not as a gimmick on a weak site.",
+        body: "GEO works best when classic SEO and answer optimization are already in place - not as a gimmick on a weak site.",
       },
     ],
     faqs: [
@@ -695,9 +695,9 @@ export const services: ServicePage[] = [
     headline: "An appointment scheduler that fills the day",
     pageTitle: "Appointment scheduler for trades",
     description:
-      "Appointment scheduler for trades—let customers book estimates and service windows online so fewer leads go cold after hours.",
+      "Appointment scheduler for trades - let customers book estimates and service windows online so fewer leads go cold after hours.",
     summary:
-      "Missed calls after 5 p.m. are missed jobs. An online appointment scheduler lets homeowners pick a time while you stay on the tools—and keeps your calendar fuller.",
+      "Missed calls after 5 p.m. are missed jobs. An online appointment scheduler lets homeowners pick a time while you stay on the tools - and keeps your calendar fuller.",
     searchExample: "book plumber online",
     problemHeading: "Why phone-tag loses booked work",
     outcomesHeading: "Scheduling that converts website traffic",
@@ -740,12 +740,12 @@ export const services: ServicePage[] = [
       {
         question: "Will customers book the wrong jobs?",
         answer:
-          "You control what can be booked—estimates, service calls, or specific job types—so the calendar stays useful for your crew.",
+          "You control what can be booked - estimates, service calls, or specific job types - so the calendar stays useful for your crew.",
       },
       {
         question: "Does scheduling help SEO?",
         answer:
-          "Indirectly. Better conversion from the same traffic means more jobs from the visibility you already earned—and fewer wasted clicks.",
+          "Indirectly. Better conversion from the same traffic means more jobs from the visibility you already earned - and fewer wasted clicks.",
       },
       {
         question: "Can it work with a CRM?",
@@ -769,9 +769,9 @@ export const services: ServicePage[] = [
     headline: "Online payments that get you paid faster",
     pageTitle: "Online payments for contractors",
     description:
-      "Online payments for contractors—send invoices customers can pay on any device so cash flow keeps up with the work.",
+      "Online payments for contractors - send invoices customers can pay on any device so cash flow keeps up with the work.",
     summary:
-      "Chasing checks slows the shop down. Online payments let customers pay deposits and final invoices the same day—without another trip across town.",
+      "Chasing checks slows the shop down. Online payments let customers pay deposits and final invoices the same day - without another trip across town.",
     searchExample: "pay contractor invoice online",
     problemHeading: "Why slow payments hurt good crews",
     outcomesHeading: "Get paid without the chase",
@@ -788,7 +788,7 @@ export const services: ServicePage[] = [
       },
       {
         title: "Frictional checkout",
-        body: "If paying is harder than hiring the next guy, customers stall—even when they liked the work.",
+        body: "If paying is harder than hiring the next guy, customers stall - even when they liked the work.",
       },
     ],
     outcomes: [
@@ -814,7 +814,7 @@ export const services: ServicePage[] = [
       {
         question: "Can customers pay from their phone?",
         answer:
-          "Yes. Modern online payments are built for mobile—so homeowners can pay without a desktop or a paper check.",
+          "Yes. Modern online payments are built for mobile - so homeowners can pay without a desktop or a paper check.",
       },
       {
         question: "Does this replace my accountant?",

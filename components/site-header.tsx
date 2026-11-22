@@ -3,9 +3,10 @@ import { SiteHeaderActions } from "@/components/site-header-actions";
 
 const links = [
   { href: "/#found", label: "Get found" },
-  { href: "/#how", label: "How it works" },
+  { href: "/how-it-works", label: "How it works" },
   { href: "/services", label: "Services" },
-  { href: "/trades", label: "Trades" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/about", label: "About" },
   { href: "/blog", label: "Blog" },
   { href: "/report", label: "Free report" },
 ] as const;

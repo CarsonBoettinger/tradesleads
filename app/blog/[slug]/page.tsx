@@ -6,7 +6,10 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Container, Eyebrow, demoHref, primaryButtonClass } from "@/components/ui";
 import { Markdown } from "@/lib/blog/markdown";
-import { getPublishedPostBySlug, listPublishedPosts } from "@/lib/blog/posts";
+import {
+  getPublishedPostBySlug,
+  listPublishedPostSlugs,
+} from "@/lib/blog/posts";
 import {
   blogPostingJsonLd,
   breadcrumbJsonLd,
@@ -17,13 +20,19 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
+/** Fully prerender published posts at build so first visits are not cold. */
+export const ensureStatic = "navigation";
+
 export async function generateStaticParams() {
-  try {
-    const posts = await listPublishedPosts(100);
-    return posts.map((post) => ({ slug: post.slug }));
-  } catch {
-    return [];
+  // Do not swallow errors: ensureStatic=navigation needs real params at build,
+  // otherwise first visits pay a multi-second cold render.
+  const slugs = await listPublishedPostSlugs();
+  if (!slugs.length) {
+    throw new Error(
+      "No published blog posts found. Refusing to build /blog/[slug] without static params.",
+    );
   }
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -33,7 +42,7 @@ export async function generateMetadata({
   const post = await getPublishedPostBySlug(slug);
   if (!post) return {};
 
-  const title = post.meta_title ?? post.title;
+  const title = stripBrandTitleSuffix(post.meta_title ?? post.title);
   const description = post.meta_description ?? post.excerpt;
 
   return buildPageMetadata({
@@ -57,6 +66,11 @@ export async function generateMetadata({
       },
     ],
   });
+}
+
+/** Layout template already appends "| Kalvez"; strip legacy brand suffixes. */
+function stripBrandTitleSuffix(title: string) {
+  return title.replace(/\s*\|\s*(Kalvez|FOREMAN)\s*$/i, "").trim();
 }
 
 function formatDate(value: string | null) {

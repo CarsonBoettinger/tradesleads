@@ -2,7 +2,7 @@ import { connection } from "next/server";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { requireDashboardUser } from "@/lib/auth/profile";
 
-// Auth + DB access — allow request-time rendering under Cache Components.
+// Auth + DB access - allow request-time rendering under Cache Components.
 export const instant = false;
 
 export default async function DashboardLayout({

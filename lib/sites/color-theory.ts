@@ -169,7 +169,7 @@ export function themeFromPrimary(
   });
 
   // Trade CTAs: warm gold/amber pairs with red, navy, and green.
-  // Never use complementary cyan — that is what made red+mint palettes.
+  // Never use complementary cyan - that is what made red+mint palettes.
   // If the brand primary is already gold, use navy so buttons still contrast.
   const primaryIsGold =
     h >= 28 && h <= 62 && primarySat > 0.35 && primaryLight > 0.3;

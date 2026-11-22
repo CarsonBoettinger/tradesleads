@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/json-ld";
 import { SiteFooter } from "@/components/site-footer";
@@ -13,12 +14,14 @@ import {
   reportCta,
   reportHref,
 } from "@/components/ui";
+import { Markdown } from "@/lib/blog/markdown";
 import {
   breadcrumbJsonLd,
   buildPageMetadata,
   tradeServiceJsonLd,
   webPageJsonLd,
 } from "@/lib/seo";
+import { getTradeGuideMarkdown } from "@/lib/trades/guides";
 import {
   getRelatedTrades,
   getTradeBySlug,
@@ -41,43 +44,69 @@ export async function generateMetadata({
   const trade = getTradeBySlug(slug);
   if (!trade) return {};
 
-  const title = `Local growth for ${trade.name}`;
+  const title = trade.pageTitle;
   const description = trade.description;
 
   return buildPageMetadata({
     title,
     description,
     path: tradeHref(trade.slug),
+    noIndex: !trade.indexable,
     keywords: [
       `${trade.name} marketing`,
       `${trade.singular} website`,
       `local SEO for ${trade.name}`,
       trade.searchExample,
       `Google Business Profile for ${trade.name}`,
+      trade.pageTitle,
     ],
     images: [
       {
         url: `${tradeHref(trade.slug)}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: `Local growth for ${trade.name}`,
+        alt: trade.pageTitle,
       },
     ],
   });
 }
 
-export default async function TradePage({ params }: PageProps) {
+function TradePageFallback() {
+  return (
+    <main id="content">
+      <section className="pt-14 pb-16 sm:pt-20 sm:pb-24">
+        <Container>
+          <div className="grid items-start gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-16">
+            <div>
+              <div className="h-4 w-24 rounded bg-peach" />
+              <div className="mt-4 h-14 max-w-2xl rounded bg-peach/70 sm:h-16" />
+              <div className="mt-6 h-20 max-w-xl rounded bg-peach/50" />
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <div className="h-12 w-40 rounded-lg bg-peach" />
+                <div className="h-12 w-40 rounded-lg bg-peach/60" />
+              </div>
+            </div>
+            <div className="h-72 rounded-xl border-2 border-peach bg-white sm:h-80" />
+          </div>
+        </Container>
+      </section>
+    </main>
+  );
+}
+
+async function TradePageContent({ params }: PageProps) {
   const { slug } = await params;
   const trade = getTradeBySlug(slug);
   if (!trade) notFound();
 
   const otherTrades = getRelatedTrades(trade.slug, 8);
+  const guide = getTradeGuideMarkdown(trade.slug);
 
   return (
-    <div>
+    <>
       <JsonLd
         data={webPageJsonLd({
-          name: `Local growth for ${trade.name}`,
+          name: trade.pageTitle,
           description: trade.description,
           path: tradeHref(trade.slug),
         })}
@@ -90,7 +119,6 @@ export default async function TradePage({ params }: PageProps) {
           { name: trade.name, path: tradeHref(trade.slug) },
         ])}
       />
-      <SiteHeader />
       <main id="content">
         <section className="pt-14 pb-16 sm:pt-20 sm:pb-24">
           <Container>
@@ -98,7 +126,7 @@ export default async function TradePage({ params }: PageProps) {
               <div>
                 <Eyebrow>{trade.name}</Eyebrow>
                 <h1 className="mt-4 max-w-2xl text-[2.5rem] leading-[1.05] font-extrabold tracking-[-0.02em] text-balance text-cocoa sm:text-5xl lg:text-6xl">
-                  {trade.headline}
+                  {trade.pageTitle}
                 </h1>
                 <p className="mt-6 max-w-xl text-[18px] leading-[1.6] text-muted sm:text-[19px]">
                   {trade.summary}
@@ -218,6 +246,20 @@ export default async function TradePage({ params }: PageProps) {
           </Container>
         </section>
 
+        {guide ? (
+          <section className="bg-white py-20 sm:py-28">
+            <Container>
+              <Eyebrow>Field guide</Eyebrow>
+              <h2 className="mt-4 max-w-3xl text-[2.25rem] leading-[1.05] font-extrabold tracking-[-0.02em] text-balance text-cocoa sm:text-5xl">
+                How {trade.name.toLowerCase()} win more work from Google
+              </h2>
+              <div className="mx-auto mt-12 max-w-3xl">
+                <Markdown content={guide} />
+              </div>
+            </Container>
+          </section>
+        ) : null}
+
         <section className="py-6" aria-labelledby="trade-cta-heading">
           <Container>
             <div className="rounded-xl bg-cocoa px-6 py-14 text-center sm:px-12 sm:py-16">
@@ -267,6 +309,17 @@ export default async function TradePage({ params }: PageProps) {
           </Container>
         </section>
       </main>
+    </>
+  );
+}
+
+export default function TradePage({ params }: PageProps) {
+  return (
+    <div>
+      <SiteHeader />
+      <Suspense fallback={<TradePageFallback />}>
+        <TradePageContent params={params} />
+      </Suspense>
       <SiteFooter />
     </div>
   );

@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 const phrases = [
   "more jobs",
   "more Google traffic",
+  "more Google reviews",
+  "more referrals",
   "more repeat customers",
 ] as const;
 
@@ -26,17 +28,18 @@ export function HeroRotatingPhrase() {
 
   useEffect(() => {
     if (!ready || reduceMotion) return;
+    const count = phrases.length;
     const id = window.setInterval(() => {
-      setIndex((current) => (current + 1) % phrases.length);
+      setIndex((current) => (current + 1) % count);
     }, INTERVAL_MS);
     return () => window.clearInterval(id);
-  }, [ready, reduceMotion]);
+  }, [ready, reduceMotion, phrases.length]);
 
   // Keep SSR and the first client paint identical.
   const active = ready && reduceMotion ? null : phrases[ready ? index : 0];
 
   return (
-    <span className="relative mt-1 inline-grid w-full text-foreman">
+    <span className="relative mt-1 inline-grid w-full text-foreman" aria-hidden="true">
       {phrases.map((phrase) => (
         <span
           key={`sizer-${phrase}`}
@@ -56,7 +59,6 @@ export function HeroRotatingPhrase() {
               ? "hero-phrase-pop col-start-1 row-start-1"
               : "col-start-1 row-start-1"
           }
-          aria-live={ready ? "polite" : undefined}
         >
           {active}
         </span>

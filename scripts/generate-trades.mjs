@@ -15,6 +15,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
  *  article: "a" | "an";
  *  category: string;
  *  featured?: boolean;
+ *  indexable?: boolean; // false = noindex until real long-form content exists
  *  headline: string;
  *  searchExample: string;
  *  blurb: string;
@@ -25,6 +26,46 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
  *  outcomes: [string, string, string];
  *  outcomeBodies: [string, string, string];
  * }} Seed */
+
+/** Long-tail crafts / primary pages kept live but noindexed until they have real content. */
+const NOINDEX_SLUGS = new Set([
+  "blacksmithing",
+  "shoe-repair",
+  "tailoring",
+  "leatherwork",
+  "furniture-making",
+  "upholstery",
+  "millwork",
+  "farming",
+  "ranching",
+  "logging",
+  "fishing",
+  "quarrying",
+  "oil-field-services",
+]);
+
+const SMALL_TITLE_WORDS = new Set(["and", "or", "of", "the", "a", "an", "for"]);
+
+function titleCaseWords(value) {
+  return value
+    .split(/\s+/)
+    .map((word, index) => {
+      if (!word) return word;
+      const lower = word.toLowerCase();
+      if (index > 0 && SMALL_TITLE_WORDS.has(lower)) return lower;
+      if (word.toUpperCase() === word && word.length <= 4) return word;
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(" ");
+}
+
+/** Search-intent titles like "Plumber Marketing & Local SEO". */
+function marketingPageTitle(seed) {
+  if (seed.name === "HVAC" || seed.singular.toLowerCase().startsWith("hvac")) {
+    return "HVAC Marketing & Local SEO";
+  }
+  return `${titleCaseWords(seed.singular)} Marketing & Local SEO`;
+}
 
 /** @type {Seed[]} */
 const seeds = [
@@ -2771,8 +2812,11 @@ function esc(value) {
 }
 
 function tradeObject(seed) {
-  const description = `Websites and local search growth for ${seed.name.toLowerCase()}. Show up for ${seed.jobs} when customers in your area are ready to hire.`;
-  const summary = `${seed.blurb} Kalvez helps ${seed.name.toLowerCase()} get found ${seed.moment}.`;
+  const pageTitle = marketingPageTitle(seed);
+  const indexable =
+    seed.indexable !== false && !NOINDEX_SLUGS.has(seed.slug);
+  const description = `${pageTitle} for ${seed.name.toLowerCase()}. Show up for ${seed.jobs} when customers in your area are ready to hire.`;
+  const summary = `${pageTitle} helps ${seed.name.toLowerCase()} get found ${seed.moment}. ${seed.blurb}`;
 
   return `  {
     slug: "${seed.slug}",
@@ -2781,7 +2825,9 @@ function tradeObject(seed) {
     article: "${seed.article}",
     category: "${seed.category}",
     featured: ${seed.featured ? "true" : "false"},
-    headline: "${esc(seed.headline)}",
+    indexable: ${indexable ? "true" : "false"},
+    pageTitle: "${esc(pageTitle)}",
+    headline: "${esc(pageTitle)}",
     description: "${esc(description)}",
     blurb: "${esc(seed.blurb)}",
     searchExample: "${esc(seed.searchExample)}",
@@ -2840,6 +2886,10 @@ export type TradePage = {
   article: "a" | "an";
   category: TradeCategoryId;
   featured: boolean;
+  /** False = robots noindex until the page has real long-form content. */
+  indexable: boolean;
+  /** Search-intent title used for <title>, H1, and intro (e.g. Plumber Marketing & Local SEO). */
+  pageTitle: string;
   headline: string;
   description: string;
   blurb: string;

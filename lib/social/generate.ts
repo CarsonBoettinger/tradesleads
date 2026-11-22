@@ -2,6 +2,9 @@ import "server-only";
 
 import { generateAndStoreAiPhotos } from "@/lib/sites/ai-images";
 import { getBrandAssets, getBrandById, getBrandProfile, getSiteConfig } from "@/lib/sites/brands";
+import { DEFAULT_THEME } from "@/lib/sites/color-theory";
+import type { SiteTheme } from "@/lib/sites/types";
+import { composeAndStoreBrandedSocialImage } from "@/lib/social/branded-image";
 import { listActiveConnectionsForBrand } from "@/lib/social/connections";
 import {
   createPendingPost,
@@ -15,6 +18,21 @@ import {
 } from "@/lib/social/settings";
 import type { SocialPlatform } from "@/lib/social/types";
 
+const PER_RUN_CREATE_CAP = 12;
+
+function resolveTheme(theme: Partial<SiteTheme> | null | undefined): SiteTheme {
+  return {
+    primary: theme?.primary || DEFAULT_THEME.primary,
+    secondary: theme?.secondary || DEFAULT_THEME.secondary,
+    accent: theme?.accent || DEFAULT_THEME.accent,
+    background: theme?.background || DEFAULT_THEME.background,
+    surface: theme?.surface || DEFAULT_THEME.surface,
+    text: theme?.text || DEFAULT_THEME.text,
+    muted: theme?.muted || DEFAULT_THEME.muted,
+    fontFamily: theme?.fontFamily || DEFAULT_THEME.fontFamily,
+  };
+}
+
 async function generateCaption(input: {
   businessName: string;
   trade: string | null;
@@ -22,6 +40,7 @@ async function generateCaption(input: {
   services: string[];
   keywords: string[];
   recent: string[];
+  theme: SiteTheme;
 }): Promise<{ caption: string; model: string | null }> {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   const model =
@@ -51,7 +70,8 @@ async function generateCaption(input: {
             role: "system",
             content: `You write short Facebook/Instagram captions for local Canadian trade businesses.
 Return JSON: {"caption":"..."}.
-Rules: 1-3 short sentences + optional soft CTA. Mention the trade/town naturally. No hashtag spam (max 3). No fake reviews, prices, or urgency scams. Plain friendly voice. No exclamation overload.`,
+Rules: 1-3 short sentences + optional soft CTA. Mention the trade/town naturally. No hashtag spam (max 3). No fake reviews, prices, or urgency scams. Plain friendly voice. No exclamation overload.
+Brand visual pairing: captions may lightly echo the brand's look (e.g. "our navy truck", "gold-standard finish") using the provided palette, but never invent colors not listed and never mention hex codes.`,
           },
           {
             role: "user",
@@ -61,6 +81,11 @@ Rules: 1-3 short sentences + optional soft CTA. Mention the trade/town naturally
               town: input.town,
               services: input.services.slice(0, 8),
               keywords: input.keywords.slice(0, 8),
+              brandColors: {
+                primary: input.theme.primary,
+                secondary: input.theme.secondary,
+                accent: input.theme.accent,
+              },
               avoidRepeating: input.recent.slice(0, 8),
             }),
           },
@@ -89,43 +114,90 @@ function fallbackCaption(input: {
 }): string {
   const trade = input.trade ?? "home services";
   const town = input.town ?? "your area";
-  return `${input.businessName} — reliable ${trade} for homes in ${town}. Local crew, clear communication, work done right. Message us to book.`;
+  return `${input.businessName} - reliable ${trade} for homes in ${town}. Local crew, clear communication, work done right. Message us to book.`;
 }
 
-async function pickImage(brandId: string, businessName: string, trade: string | null, town: string | null) {
+async function pickImage(
+  brandId: string,
+  businessName: string,
+  trade: string | null,
+  town: string | null,
+  theme: SiteTheme,
+) {
   const assets = await getBrandAssets(brandId);
+  const logo =
+    assets.find((a) => a.kind === "logo" && a.is_primary && a.public_url) ??
+    assets.find((a) => a.kind === "logo" && a.public_url);
+  const logoUrl = (logo?.public_url as string | undefined) ?? null;
+
   const usable = assets.filter(
     (a) =>
       a.public_url &&
       (a.kind === "gallery" || a.kind === "hero" || a.kind === "og"),
   );
+
+  let sourceUrl: string | null = null;
+  let source: "brand_asset" | "ai" | "none" = "none";
+
   if (usable.length > 0) {
     const pick = usable[Math.floor(Math.random() * usable.length)]!;
+    sourceUrl = pick.public_url as string;
+    source = "brand_asset";
+  } else {
+    const generated = await generateAndStoreAiPhotos({
+      brandId,
+      businessName,
+      trade,
+      town,
+      needed: 1,
+      startOrder: assets.length + 1,
+      brandColors: {
+        primary: theme.primary,
+        secondary: theme.secondary,
+        accent: theme.accent,
+      },
+    });
+    const first = generated[0];
+    if (first?.public_url) {
+      sourceUrl = first.public_url as string;
+      source = "ai";
+    }
+  }
+
+  if (!sourceUrl) {
     return {
-      imageAssetId: pick.id as string,
-      imageUrl: pick.public_url as string,
-      source: "brand_asset" as const,
+      imageAssetId: null as string | null,
+      imageUrl: null as string | null,
+      source,
+      branded: false,
     };
   }
 
-  const generated = await generateAndStoreAiPhotos({
+  const branded = await composeAndStoreBrandedSocialImage({
     brandId,
     businessName,
-    trade,
-    town,
-    needed: 1,
-    startOrder: assets.length + 1,
+    sourceUrl,
+    theme,
+    logoUrl,
+    sortOrder: assets.length + 50,
   });
-  const first = generated[0];
-  if (first?.public_url) {
+
+  if (branded) {
     return {
-      imageAssetId: (first.id as string) ?? null,
-      imageUrl: first.public_url as string,
-      source: "ai" as const,
+      imageAssetId: branded.imageAssetId,
+      imageUrl: branded.imageUrl,
+      source,
+      branded: true,
     };
   }
 
-  return { imageAssetId: null, imageUrl: null, source: "none" as const };
+  // Fall back to the unbranded source if compositing fails.
+  return {
+    imageAssetId: null as string | null,
+    imageUrl: sourceUrl,
+    source,
+    branded: false,
+  };
 }
 
 export async function generatePostsForBrand(brandId: string): Promise<{
@@ -162,6 +234,8 @@ export async function generatePostsForBrand(brandId: string): Promise<{
     listRecentCaptions(brandId),
   ]);
 
+  const theme = resolveTheme(config?.theme);
+
   const profileServices = profile?.payload?.services ?? [];
   const contentServices = (config?.content?.services ?? [])
     .map((s) => s.name)
@@ -176,8 +250,8 @@ export async function generatePostsForBrand(brandId: string): Promise<{
   ].filter((v): v is string => Boolean(v));
 
   let created = 0;
-  // Cap per run so cron stays responsive.
-  for (const scheduledFor of slots.slice(0, 7)) {
+  // Cap per run so cron stays responsive while still filling a month over a few passes.
+  for (const scheduledFor of slots.slice(0, PER_RUN_CREATE_CAP)) {
     const { caption, model } = await generateCaption({
       businessName: brand.name,
       trade: brand.trade,
@@ -185,6 +259,7 @@ export async function generatePostsForBrand(brandId: string): Promise<{
       services,
       keywords,
       recent,
+      theme,
     });
     recent.unshift(caption);
 
@@ -193,6 +268,7 @@ export async function generatePostsForBrand(brandId: string): Promise<{
       brand.name,
       brand.trade,
       brand.town,
+      theme,
     );
     if (!image.imageUrl) {
       // Meta photo posts need a public image URL.
@@ -209,6 +285,12 @@ export async function generatePostsForBrand(brandId: string): Promise<{
       generationMeta: {
         model,
         imageSource: image.source,
+        branded: image.branded,
+        theme: {
+          primary: theme.primary,
+          secondary: theme.secondary,
+          accent: theme.accent,
+        },
         generatedAt: new Date().toISOString(),
       },
     });

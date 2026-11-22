@@ -24,3 +24,10 @@
 # Social posting agent: generate draft pipeline + publish due posts.
 [functions."social-agent"]
   schedule = "0 * * * *"
+
+# Default Netlify subdomain → primary custom domain (SEO + single canonical host).
+[[redirects]]
+  from = "https://kalvez.netlify.app/*"
+  to = "https://kalvez.com/:splat"
+  status = 301
+  force = true

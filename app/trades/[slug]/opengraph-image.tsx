@@ -15,7 +15,7 @@ export default async function Image({ params }: Props) {
 
   return renderOgImage({
     eyebrow: trade ? `Kalvez · ${trade.name}` : "Kalvez",
-    title: trade?.headline ?? "Growth for the trades",
+    title: trade?.pageTitle ?? trade?.headline ?? "Growth for the trades",
     description:
       trade?.description ??
       "Websites and local search growth for the businesses that build our world.",

@@ -13,6 +13,7 @@ import {
 } from "@/lib/sites/hours";
 import { SocialCadenceSettings } from "@/components/dashboard/social-cadence-settings";
 import { SocialsPanel } from "@/components/dashboard/socials-panel";
+import { LeadsPanel } from "@/components/dashboard/leads-panel";
 import {
   GENERATION_PHASE_LABELS,
   type Brand,
@@ -33,16 +34,30 @@ type Member = {
   profile: { email?: string | null; full_name?: string | null } | null;
 };
 
-type SectionId = "website" | "socials" | "brand" | "settings";
+type SectionId =
+  | "website"
+  | "leads"
+  | "socials"
+  | "brand"
+  | "launch"
+  | "settings";
 
 const SECTIONS: Array<{
   id: SectionId;
   label: string;
   icon: React.ReactNode;
+  staffOnly?: boolean;
 }> = [
   { id: "website", label: "Website", icon: <IconGlobe /> },
+  { id: "leads", label: "Leads", icon: <IconLeads /> },
   { id: "socials", label: "Socials", icon: <IconShare /> },
   { id: "brand", label: "Brand", icon: <IconPalette /> },
+  {
+    id: "launch",
+    label: "Launch",
+    icon: <IconRocket />,
+    staffOnly: true,
+  },
   { id: "settings", label: "Settings", icon: <IconSettings /> },
 ];
 
@@ -79,11 +94,20 @@ export function BrandDetail({
       q === "socials" ||
       q === "brand" ||
       q === "settings" ||
-      q === "website"
+      q === "website" ||
+      q === "leads" ||
+      q === "launch"
     ) {
+      if (q === "launch" && role !== "staff") return;
       setSection(q);
     }
-  }, []);
+  }, [role]);
+
+  useEffect(() => {
+    if (section === "launch" && role !== "staff") {
+      setSection("website");
+    }
+  }, [section, role]);
   const [brand, setBrand] = useState(initialBrand);
   const [config, setConfig] = useState(initialConfig);
   const [assets, setAssets] = useState(initialAssets);
@@ -262,7 +286,7 @@ export function BrandDetail({
         setMessage(
           json.emailError
             ? `Client invited, but email did not send (${json.emailError}). Share the temporary password below.`
-            : "Client invited. Share the temporary password below — it is shown only once.",
+            : "Client invited. Share the temporary password below - it is shown only once.",
         );
       }
     } else {
@@ -363,12 +387,18 @@ export function BrandDetail({
   }
 
   function selectSection(next: SectionId) {
+    if (next === "launch" && role !== "staff") return;
     setSection(next);
     setMobileNavOpen(false);
   }
 
+  const navSections = useMemo(
+    () => SECTIONS.filter((item) => !item.staffOnly || role === "staff"),
+    [role],
+  );
+
   const sectionTitle =
-    SECTIONS.find((item) => item.id === section)?.label ?? "Website";
+    navSections.find((item) => item.id === section)?.label ?? "Website";
 
   return (
     <div className="flex min-h-dvh overflow-x-clip">
@@ -406,7 +436,7 @@ export function BrandDetail({
         </div>
 
         <nav className="flex-1 space-y-1 px-3 py-4">
-          {SECTIONS.map((item) => {
+          {navSections.map((item) => {
             const active = section === item.id;
             return (
               <button
@@ -483,23 +513,13 @@ export function BrandDetail({
                 </a>
               )}
               {role === "staff" ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={regenerate}
-                    className="rounded-[10px] border-2 border-peach px-3 py-2 text-sm font-bold hover:border-foreman"
-                  >
-                    Regenerate
-                  </button>
-                  <button
-                    type="button"
-                    onClick={publish}
-                    disabled={brand.status === "published"}
-                    className="rounded-[10px] bg-foreman px-3 py-2 text-sm font-bold text-white disabled:opacity-50"
-                  >
-                    {brand.status === "published" ? "Published" : "Publish"}
-                  </button>
-                </>
+                <button
+                  type="button"
+                  onClick={regenerate}
+                  className="rounded-[10px] border-2 border-peach px-3 py-2 text-sm font-bold hover:border-foreman"
+                >
+                  Regenerate
+                </button>
               ) : null}
             </div>
           </div>
@@ -514,11 +534,15 @@ export function BrandDetail({
               <p className="mt-1 text-sm text-muted">
                 {section === "website"
                   ? "Live preview of the generated site."
-                  : section === "socials"
-                    ? "Connect accounts and manage the posting calendar."
-                    : section === "brand"
-                      ? "Logo and brand colors."
-                      : "Posting frequency, business details, and account controls."}
+                  : section === "leads"
+                    ? "Track website and phone leads through status and follow-up actions."
+                    : section === "socials"
+                      ? "Connect accounts and manage the posting calendar."
+                      : section === "brand"
+                        ? "Logo and brand colors."
+                        : section === "launch"
+                          ? "Connect the client domain, verify DNS, and go live."
+                          : "Posting frequency, business details, and account controls."}
               </p>
             </div>
           </div>
@@ -536,8 +560,22 @@ export function BrandDetail({
               isGenerating={isGenerating}
               job={job}
               label={label}
+              setMessage={setMessage}
             />
           ) : null}
+
+          {section === "launch" && role === "staff" ? (
+            <LaunchSection
+              brand={brand}
+              brandId={brandId}
+              preview={preview}
+              setBrand={setBrand}
+              setMessage={setMessage}
+              onPublish={publish}
+            />
+          ) : null}
+
+          {section === "leads" ? <LeadsPanel brandId={brandId} /> : null}
 
           {section === "socials" ? (
             <SocialsPanel brandId={brandId} />
@@ -597,13 +635,27 @@ function WebsiteSection({
   isGenerating,
   job,
   label,
+  setMessage,
 }: {
   brand: Brand;
   preview: string;
   isGenerating: boolean;
   job: GenerationJob | null;
   label: string;
+  setMessage: (value: string) => void;
 }) {
+  const [previewCopied, setPreviewCopied] = useState(false);
+
+  async function copyPreview() {
+    try {
+      await navigator.clipboard.writeText(preview);
+      setPreviewCopied(true);
+      setTimeout(() => setPreviewCopied(false), 2000);
+    } catch {
+      setMessage("Could not copy preview link.");
+    }
+  }
+
   if (isGenerating) {
     const statusLabel =
       label ||
@@ -649,15 +701,292 @@ function WebsiteSection({
   }
 
   return (
-    <section className="rounded-[14px] border border-peach bg-white p-5">
-      <div className="overflow-hidden rounded-[12px] border border-peach">
-        <iframe
-          title="Website preview"
-          src={preview}
-          className="h-[min(78dvh,820px)] w-full bg-white"
-        />
-      </div>
-    </section>
+    <div className="space-y-5">
+      <section className="rounded-[14px] border border-peach bg-white p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="text-sm font-extrabold uppercase tracking-wide text-muted">
+              Private preview
+            </h3>
+            <p className="mt-1 break-all font-mono text-sm text-foreman">
+              {preview}
+            </p>
+            <p className="mt-1 text-sm text-muted">
+              Unguessable link for sharing. Not indexed.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={copyPreview}
+            className="rounded-[10px] border-2 border-peach px-3 py-2 text-sm font-bold hover:border-foreman"
+          >
+            {previewCopied ? "Copied" : "Copy link"}
+          </button>
+        </div>
+      </section>
+
+      <section className="rounded-[14px] border border-peach bg-white p-5">
+        <div className="overflow-hidden rounded-[12px] border border-peach">
+          <iframe
+            title="Website preview"
+            src={preview}
+            className="h-[min(78dvh,820px)] w-full bg-white"
+          />
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function LaunchSection({
+  brand,
+  brandId,
+  preview,
+  setBrand,
+  setMessage,
+  onPublish,
+}: {
+  brand: Brand;
+  brandId: string;
+  preview: string;
+  setBrand: React.Dispatch<React.SetStateAction<Brand>>;
+  setMessage: (value: string) => void;
+  onPublish: () => void | Promise<void>;
+}) {
+  const [domainInput, setDomainInput] = useState(brand.custom_domain ?? "");
+  const [includeWww, setIncludeWww] = useState(brand.custom_domain_www !== false);
+  const [dnsRows, setDnsRows] = useState<
+    Array<{ hostname: string; type: string; value: string; note: string }>
+  >([]);
+  const [domainBusy, setDomainBusy] = useState(false);
+  const [previewCopied, setPreviewCopied] = useState(false);
+
+  useEffect(() => {
+    setDomainInput(brand.custom_domain ?? "");
+    setIncludeWww(brand.custom_domain_www !== false);
+  }, [brand.custom_domain, brand.custom_domain_www]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadDomain() {
+      const response = await fetch(`/api/dashboard/brands/${brandId}/domain`);
+      if (!response.ok || cancelled) return;
+      const json = (await response.json()) as {
+        dns?: Array<{
+          hostname: string;
+          type: string;
+          value: string;
+          note: string;
+        }>;
+      };
+      if (json.dns) setDnsRows(json.dns);
+    }
+    loadDomain();
+    return () => {
+      cancelled = true;
+    };
+  }, [brandId, brand.custom_domain, brand.domain_status]);
+
+  async function copyPreview() {
+    try {
+      await navigator.clipboard.writeText(preview);
+      setPreviewCopied(true);
+      setTimeout(() => setPreviewCopied(false), 2000);
+    } catch {
+      setMessage("Could not copy preview link.");
+    }
+  }
+
+  async function domainAction(action: "save" | "verify" | "ssl") {
+    setDomainBusy(true);
+    setMessage("");
+    const response = await fetch(`/api/dashboard/brands/${brandId}/domain`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action,
+        customDomain: domainInput,
+        customDomainWww: includeWww,
+      }),
+    });
+    const json = (await response.json()) as {
+      error?: string;
+      brand?: Brand;
+      dns?: Array<{
+        hostname: string;
+        type: string;
+        value: string;
+        note: string;
+      }>;
+      ok?: boolean;
+    };
+    setDomainBusy(false);
+    if (!response.ok) {
+      setMessage(json.error ?? "Domain update failed.");
+      if (json.brand) setBrand(json.brand);
+      if (json.dns) setDnsRows(json.dns);
+      return;
+    }
+    if (json.brand) setBrand(json.brand);
+    if (json.dns) setDnsRows(json.dns);
+    if (action === "save") setMessage("Domain saved. Point DNS, then verify.");
+    if (action === "verify") {
+      setMessage(
+        json.ok
+          ? "DNS looks good. Provision SSL next."
+          : json.error ?? "DNS not ready yet.",
+      );
+    }
+    if (action === "ssl") setMessage("Domain is live. You can publish now.");
+  }
+
+  const domainStatusLabel = brand.domain_status?.replaceAll("_", " ") ?? "none";
+  const canPublish =
+    brand.status !== "published" &&
+    brand.domain_status === "live" &&
+    Boolean(brand.custom_domain);
+
+  return (
+    <div className="space-y-5">
+      <section className="rounded-[14px] border border-peach bg-white p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="text-sm font-extrabold uppercase tracking-wide text-muted">
+              Private preview
+            </h3>
+            <p className="mt-1 break-all font-mono text-sm text-foreman">
+              {preview}
+            </p>
+            <p className="mt-1 text-sm text-muted">
+              Share this unguessable link before the client domain is live.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={copyPreview}
+            className="rounded-[10px] border-2 border-peach px-3 py-2 text-sm font-bold hover:border-foreman"
+          >
+            {previewCopied ? "Copied" : "Copy link"}
+          </button>
+        </div>
+      </section>
+
+      <section className="rounded-[14px] border border-peach bg-white p-5">
+        <div>
+          <h3 className="text-lg font-extrabold tracking-tight">
+            Custom domain
+          </h3>
+          <p className="mt-1 text-sm text-muted">
+            Status: {domainStatusLabel}
+            {brand.domain_error ? ` — ${brand.domain_error}` : ""}
+          </p>
+        </div>
+
+        <label className="mt-4 block text-sm font-semibold">
+          Domain
+          <input
+            value={domainInput}
+            onChange={(e) => setDomainInput(e.target.value)}
+            placeholder="example.com"
+            className={fieldClass}
+            autoComplete="off"
+          />
+        </label>
+        <label className="mt-3 flex items-center gap-2 text-sm font-semibold">
+          <input
+            type="checkbox"
+            checked={includeWww}
+            onChange={(e) => setIncludeWww(e.target.checked)}
+          />
+          Also attach www subdomain
+        </label>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            type="button"
+            disabled={domainBusy}
+            onClick={() => domainAction("save")}
+            className="rounded-[10px] bg-foreman px-3 py-2 text-sm font-bold text-white disabled:opacity-50"
+          >
+            Save domain
+          </button>
+          <button
+            type="button"
+            disabled={domainBusy || !brand.custom_domain}
+            onClick={() => domainAction("verify")}
+            className="rounded-[10px] border-2 border-peach px-3 py-2 text-sm font-bold hover:border-foreman disabled:opacity-50"
+          >
+            Check DNS
+          </button>
+          <button
+            type="button"
+            disabled={
+              domainBusy ||
+              !brand.custom_domain ||
+              (brand.domain_status !== "pending_ssl" &&
+                brand.domain_status !== "live" &&
+                brand.domain_status !== "pending_dns")
+            }
+            onClick={() => domainAction("ssl")}
+            className="rounded-[10px] border-2 border-peach px-3 py-2 text-sm font-bold hover:border-foreman disabled:opacity-50"
+          >
+            Provision SSL
+          </button>
+        </div>
+
+        {dnsRows.length > 0 ? (
+          <div className="mt-5 overflow-x-auto">
+            <table className="min-w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-peach text-muted">
+                  <th className="py-2 pr-3 font-semibold">Host</th>
+                  <th className="py-2 pr-3 font-semibold">Type</th>
+                  <th className="py-2 pr-3 font-semibold">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                {dnsRows.map((row) => (
+                  <tr key={row.hostname} className="border-b border-peach/60">
+                    <td className="py-2 pr-3 font-mono text-xs">
+                      {row.hostname}
+                    </td>
+                    <td className="py-2 pr-3">{row.type}</td>
+                    <td className="py-2 pr-3 font-mono text-xs">{row.value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="mt-2 text-xs text-muted">
+              After DNS propagates, Check DNS then Provision SSL. Publish only
+              when status is live.
+            </p>
+          </div>
+        ) : null}
+      </section>
+
+      <section className="rounded-[14px] border border-peach bg-white p-5">
+        <h3 className="text-lg font-extrabold tracking-tight">Publish</h3>
+        <p className="mt-1 text-sm text-muted">
+          Makes the site indexable on the client domain. Requires a live custom
+          domain.
+        </p>
+        <button
+          type="button"
+          onClick={() => void onPublish()}
+          disabled={!canPublish && brand.status !== "published"}
+          title={
+            brand.status === "published"
+              ? "Already published"
+              : brand.domain_status !== "live"
+                ? "Launch on a live custom domain before publishing"
+                : undefined
+          }
+          className="mt-4 rounded-[10px] bg-foreman px-3 py-2 text-sm font-bold text-white disabled:opacity-50"
+        >
+          {brand.status === "published" ? "Published" : "Publish site"}
+        </button>
+      </section>
+    </div>
   );
 }
 
@@ -910,15 +1239,15 @@ function BrandSection({
           <dl className="mt-6 space-y-2 border-t border-peach pt-4 text-sm">
             <div>
               <dt className="font-semibold text-muted">Primary keyword</dt>
-              <dd>{config?.keywords?.primary || "—"}</dd>
+              <dd>{config?.keywords?.primary || "-"}</dd>
             </div>
             <div>
               <dt className="font-semibold text-muted">Title</dt>
-              <dd>{config?.seo?.title || "—"}</dd>
+              <dd>{config?.seo?.title || "-"}</dd>
             </div>
             <div>
               <dt className="font-semibold text-muted">Meta description</dt>
-              <dd>{config?.seo?.description || "—"}</dd>
+              <dd>{config?.seo?.description || "-"}</dd>
             </div>
           </dl>
         </section>
@@ -1291,6 +1620,53 @@ function IconGlobe() {
         d="M3 10h14M10 3c2.2 2.2 3.3 4.5 3.3 7S12.2 14.8 10 17c-2.2-2.2-3.3-4.5-3.3-7S7.8 5.2 10 3z"
         stroke="currentColor"
         strokeWidth="1.75"
+      />
+    </svg>
+  );
+}
+
+function IconRocket() {
+  return (
+    <svg viewBox="0 0 20 20" className="size-4" fill="none" aria-hidden>
+      <path
+        d="M12.8 3.4c1.8.2 3.6 2 3.8 3.8l-5.2 7.4-3.2-3.2 4.6-8z"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8.2 11.4l-3.4 1.1 1.1-3.4"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="12.2" cy="7.8" r="1.1" fill="currentColor" />
+      <path
+        d="M4.2 15.8c.8-.2 1.8-.7 2.5-1.4"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function IconLeads() {
+  return (
+    <svg viewBox="0 0 20 20" className="size-4" fill="none" aria-hidden>
+      <path
+        d="M6.5 16.5v-2.2c0-1.5 1.2-2.8 2.8-2.8h1.4c1.5 0 2.8 1.3 2.8 2.8v2.2"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+      <circle cx="10" cy="7" r="2.6" stroke="currentColor" strokeWidth="1.75" />
+      <path
+        d="M3.5 16.2v-1.6c0-1.1.8-2 1.9-2.2M16.5 16.2v-1.6c0-1.1-.8-2-1.9-2.2"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
       />
     </svg>
   );

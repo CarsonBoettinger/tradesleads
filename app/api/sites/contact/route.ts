@@ -10,7 +10,7 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 import { parseEmail, parsePhone } from "@/lib/contact";
 
 export async function POST(request: Request) {
-  const crossOrigin = rejectCrossOrigin(request, { requireOrigin: true });
+  const crossOrigin = await rejectCrossOrigin(request, { requireOrigin: true });
   if (crossOrigin) return crossOrigin;
 
   const limited = await enforceRateLimit({
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
 
   try {
     const admin = getSupabaseAdmin();
-    await admin.from("leads").insert({
+    const { error } = await admin.from("leads").insert({
       first_name: firstName,
       last_name: lastName,
       email,
@@ -87,6 +87,7 @@ export async function POST(request: Request) {
       business: brand.name,
       town: brand.town ?? "",
       trade: brand.trade ?? "",
+      best_time: "Anytime",
       comments: details,
       consent: true,
       source: `site:${brand.slug}`,
@@ -94,8 +95,23 @@ export async function POST(request: Request) {
       direction: "inbound",
       channel: "manual",
       place_id: brand.place_id,
+      brand_id: brand.id,
       status: "new",
+      checklist: {
+        called: false,
+        quoted: false,
+        scheduled: false,
+        followed_up: false,
+      },
     });
+
+    if (error) {
+      console.error("Site contact insert failed:", error);
+      return Response.json(
+        { error: "Could not save your message." },
+        { status: 500 },
+      );
+    }
 
     return Response.json({ ok: true });
   } catch (error) {

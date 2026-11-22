@@ -1,12 +1,13 @@
 import "server-only";
 
-import { cacheTag } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import type { BlogPost, BlogPostInput } from "./types";
 
 export async function listPublishedPosts(limit = 50): Promise<BlogPost[]> {
   "use cache";
   cacheTag("blog-posts");
+  cacheLife("max");
 
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
@@ -25,6 +26,7 @@ export async function getPublishedPostBySlug(
 ): Promise<BlogPost | null> {
   "use cache";
   cacheTag("blog-posts", `blog-post-${slug}`);
+  cacheLife("max");
 
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
@@ -36,6 +38,23 @@ export async function getPublishedPostBySlug(
 
   if (error) throw new Error(`Failed to load post: ${error.message}`);
   return (data as BlogPost | null) ?? null;
+}
+
+export async function listPublishedPostSlugs(): Promise<string[]> {
+  "use cache";
+  cacheTag("blog-posts");
+  cacheLife("max");
+
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("posts")
+    .select("slug")
+    .eq("status", "published")
+    .order("published_at", { ascending: false })
+    .limit(500);
+
+  if (error) throw new Error(`Failed to list post slugs: ${error.message}`);
+  return (data ?? []).map((row) => row.slug as string);
 }
 
 export async function listUsedTopicHints(): Promise<

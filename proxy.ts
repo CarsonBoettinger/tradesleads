@@ -1,9 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import {
   isDashboardHost,
+  isMarketingHost,
   parseRequestHost,
   siteSlugFromHost,
 } from "@/lib/hosts";
+import { lookupSlugByCustomDomain } from "@/lib/sites/domain-lookup";
 import { updateSession } from "@/lib/supabase/proxy";
 
 export async function proxy(request: NextRequest) {
@@ -24,7 +26,27 @@ export async function proxy(request: NextRequest) {
     url.pathname = `/sites/${siteSlug}${rest}`;
     const rewritten = NextResponse.rewrite(url);
     rewritten.headers.set("x-kalvez-site-slug", siteSlug);
+    rewritten.headers.set("x-kalvez-site-mode", "preview");
     return rewritten;
+  }
+
+  // Client custom domains → same generated site routes.
+  if (
+    !passthrough &&
+    !isDashboardHost(hostname) &&
+    !isMarketingHost(hostname) &&
+    !siteSlugFromHost(hostname)
+  ) {
+    const customSlug = await lookupSlugByCustomDomain(hostname);
+    if (customSlug) {
+      const url = request.nextUrl.clone();
+      const rest = pathname === "/" ? "" : pathname;
+      url.pathname = `/sites/${customSlug}${rest}`;
+      const rewritten = NextResponse.rewrite(url);
+      rewritten.headers.set("x-kalvez-site-slug", customSlug);
+      rewritten.headers.set("x-kalvez-site-mode", "custom");
+      return rewritten;
+    }
   }
 
   // dashboard.kalvez.com/login → /dashboard/login (logical path for auth + app).
@@ -61,7 +83,7 @@ export async function proxy(request: NextRequest) {
       rewriteTo: dashboardRewriteUrl ?? undefined,
     });
   } catch {
-    // Missing anon key in local env — still allow login page to show error.
+    // Missing anon key in local env - still allow login page to show error.
     if (
       dashboardPath === "/dashboard/login" ||
       dashboardPath.endsWith("/dashboard/login")

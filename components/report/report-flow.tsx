@@ -230,8 +230,10 @@ export function ReportFlow() {
             See how your business shows up online
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-muted">
-            Find your listing, watch the scan across search, your website, and
-            local reviews, then unlock your report card.
+            Find your Google listing, watch the scan across Map Pack rankings,
+            website experience, reviews, and nearby competitors, then unlock a
+            score card that shows what to fix first so more searches become
+            booked jobs.
           </p>
 
           <form

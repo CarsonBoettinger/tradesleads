@@ -73,7 +73,7 @@ export default function ServicesIndexPage() {
             </h1>
             <p className="mt-6 max-w-2xl text-[18px] leading-[1.6] text-muted sm:text-[19px]">
               {services.length} growth services for crews who want more jobs
-              from Google—search, content, reviews, bookings, and payments.
+              from Google - search, content, reviews, bookings, and payments.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <CtaLink href={demoHref}>{demoCta}</CtaLink>

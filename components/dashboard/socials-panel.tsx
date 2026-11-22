@@ -14,8 +14,6 @@ type Props = {
   brandId: string;
 };
 
-const HOUR_ROWS = [9, 12, 15, 18, 21];
-
 export function SocialsPanel({ brandId }: Props) {
   const [connections, setConnections] = useState<SocialConnectionPublic[]>([]);
   const [settings, setSettings] = useState<SocialPostSettings | null>(null);
@@ -23,7 +21,7 @@ export function SocialsPanel({ brandId }: Props) {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState("");
-  const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
+  const [monthCursor, setMonthCursor] = useState(() => startOfMonth(new Date()));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editCaption, setEditCaption] = useState("");
   const [editing, setEditing] = useState(false);
@@ -73,28 +71,40 @@ export function SocialsPanel({ brandId }: Props) {
 
   const selected = posts.find((p) => p.id === selectedId) ?? null;
 
-  const days = useMemo(() => {
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(weekStart);
-      d.setDate(weekStart.getDate() + i);
-      return d;
-    });
-  }, [weekStart]);
+  const calendarDays = useMemo(
+    () => buildMonthGrid(monthCursor),
+    [monthCursor],
+  );
 
-  const postsByDayHour = useMemo(() => {
+  const postsByDay = useMemo(() => {
     const map = new Map<string, SocialPost[]>();
     for (const post of posts) {
       if (post.status === "rejected") continue;
       const when = new Date(post.scheduledFor);
-      const dayKey = dateKey(when);
-      const hour = nearestHourRow(when.getHours());
-      const key = `${dayKey}:${hour}`;
+      const key = dateKey(when);
       const list = map.get(key) ?? [];
       list.push(post);
       map.set(key, list);
     }
+    for (const list of map.values()) {
+      list.sort(
+        (a, b) =>
+          new Date(a.scheduledFor).getTime() -
+          new Date(b.scheduledFor).getTime(),
+      );
+    }
     return map;
   }, [posts]);
+
+  const monthPending = useMemo(() => {
+    const y = monthCursor.getFullYear();
+    const m = monthCursor.getMonth();
+    return posts.filter((p) => {
+      if (p.status !== "pending_approval") return false;
+      const d = new Date(p.scheduledFor);
+      return d.getFullYear() === y && d.getMonth() === m;
+    });
+  }, [posts, monthCursor]);
 
   async function connect(platform: SocialPlatform) {
     setBusy(`connect-${platform}`);
@@ -186,6 +196,48 @@ export function SocialsPanel({ brandId }: Props) {
     }
   }
 
+  async function bulkMonth(action: "approve" | "reject") {
+    if (monthPending.length === 0) return;
+    const label =
+      action === "approve"
+        ? `Greenlight ${monthPending.length} remaining draft${monthPending.length === 1 ? "" : "s"} for this month?`
+        : `Reject ${monthPending.length} remaining draft${monthPending.length === 1 ? "" : "s"} for this month?`;
+    if (!confirm(label)) return;
+
+    setBusy(`bulk-${action}`);
+    setMessage("");
+    try {
+      const res = await fetch(`/api/dashboard/social/${brandId}/posts/bulk`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action,
+          year: monthCursor.getFullYear(),
+          monthIndex: monthCursor.getMonth(),
+        }),
+      });
+      const json = (await res.json()) as {
+        updated?: number;
+        posts?: SocialPost[];
+        error?: string;
+      };
+      if (!res.ok) {
+        setMessage(json.error || "Bulk action failed.");
+        return;
+      }
+      if (json.posts) setPosts(json.posts);
+      else await load();
+      setSelectedId(null);
+      setMessage(
+        action === "approve"
+          ? `Greenlit ${json.updated ?? 0} post${(json.updated ?? 0) === 1 ? "" : "s"} for the month.`
+          : `Rejected ${json.updated ?? 0} draft${(json.updated ?? 0) === 1 ? "" : "s"}.`,
+      );
+    } finally {
+      setBusy(null);
+    }
+  }
+
   if (loading) {
     return (
       <section className="rounded-[14px] border border-peach bg-white px-6 py-16 text-center">
@@ -251,8 +303,9 @@ export function SocialsPanel({ brandId }: Props) {
             How often would you like to post?
           </h3>
           <p className="mt-1 text-sm text-muted">
-            We&apos;ll draft caption + image posts about a week ahead. You can
-            change this later in Settings.
+            We&apos;ll draft caption + image posts for the full month ahead.
+            Greenlight the month or tweak individual posts. You can change
+            frequency later in Settings.
           </p>
           <div className="mt-5 grid gap-2 sm:grid-cols-2">
             {SOCIAL_FREQUENCY_OPTIONS.map((opt) => (
@@ -277,6 +330,11 @@ export function SocialsPanel({ brandId }: Props) {
       </div>
     );
   }
+
+  const monthLabel = monthCursor.toLocaleDateString(undefined, {
+    month: "long",
+    year: "numeric",
+  });
 
   return (
     <div className="space-y-5">
@@ -321,99 +379,117 @@ export function SocialsPanel({ brandId }: Props) {
               </div>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {monthPending.length > 0 ? (
+              <>
+                <button
+                  type="button"
+                  disabled={Boolean(busy)}
+                  onClick={() => void bulkMonth("approve")}
+                  className="rounded-[10px] bg-foreman px-3 py-1.5 text-sm font-bold text-white hover:opacity-90 disabled:opacity-50"
+                >
+                  {busy === "bulk-approve"
+                    ? "Greenlighting…"
+                    : `Greenlight remaining (${monthPending.length})`}
+                </button>
+                <button
+                  type="button"
+                  disabled={Boolean(busy)}
+                  onClick={() => void bulkMonth("reject")}
+                  className="rounded-[10px] border-2 border-red-200 bg-white px-3 py-1.5 text-sm font-semibold text-red-700 hover:border-red-400 disabled:opacity-50"
+                >
+                  {busy === "bulk-reject" ? "Rejecting…" : "Reject remaining"}
+                </button>
+              </>
+            ) : null}
             <button
               type="button"
               className="rounded-[10px] border-2 border-peach bg-white px-2.5 py-1.5 text-sm font-bold hover:border-foreman"
               onClick={() =>
-                setWeekStart((prev) => {
+                setMonthCursor((prev) => {
                   const d = new Date(prev);
-                  d.setDate(d.getDate() - 7);
-                  return startOfWeek(d);
+                  d.setMonth(d.getMonth() - 1);
+                  return startOfMonth(d);
                 })
               }
-              aria-label="Previous week"
+              aria-label="Previous month"
             >
               ←
             </button>
             <button
               type="button"
               className="rounded-[10px] border-2 border-peach bg-white px-3 py-1.5 text-sm font-bold hover:border-foreman"
-              onClick={() => setWeekStart(startOfWeek(new Date()))}
+              onClick={() => setMonthCursor(startOfMonth(new Date()))}
             >
-              Today
+              {monthLabel}
             </button>
             <button
               type="button"
               className="rounded-[10px] border-2 border-peach bg-white px-2.5 py-1.5 text-sm font-bold hover:border-foreman"
               onClick={() =>
-                setWeekStart((prev) => {
+                setMonthCursor((prev) => {
                   const d = new Date(prev);
-                  d.setDate(d.getDate() + 7);
-                  return startOfWeek(d);
+                  d.setMonth(d.getMonth() + 1);
+                  return startOfMonth(d);
                 })
               }
-              aria-label="Next week"
+              aria-label="Next month"
             >
               →
             </button>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <div
-            className="min-w-[720px] grid"
-            style={{
-              gridTemplateColumns: `64px repeat(${days.length}, minmax(110px, 1fr))`,
-            }}
-          >
-            <div className="border-b border-black/5 bg-white/80" />
-            {days.map((day) => (
-              <div
-                key={dateKey(day)}
-                className="border-b border-l border-black/5 bg-white/80 px-2 py-3 text-center"
-              >
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">
-                  {day.toLocaleDateString(undefined, { weekday: "short" })}
-                </p>
-                <p className="text-lg font-extrabold tabular-nums">
-                  {day.getDate()}
-                </p>
-              </div>
-            ))}
-
-            {HOUR_ROWS.map((hour) => (
-              <div key={hour} className="contents">
-                <div className="border-b border-black/5 px-2 py-3 text-right text-xs font-semibold text-muted">
-                  {formatHourLabel(hour)}
+        <div className="overflow-x-auto p-3">
+          <div className="min-w-[720px]">
+            <div className="mb-1 grid grid-cols-7 gap-1">
+              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+                <div
+                  key={d}
+                  className="px-1 py-1 text-center text-[11px] font-semibold uppercase tracking-wide text-muted"
+                >
+                  {d}
                 </div>
-                {days.map((day) => {
-                  const key = `${dateKey(day)}:${hour}`;
-                  const cellPosts = postsByDayHour.get(key) ?? [];
-                  return (
-                    <div
-                      key={key}
-                      className="min-h-[88px] border-b border-l border-black/5 p-1.5"
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-1">
+              {calendarDays.map((day) => {
+                const inMonth = day.getMonth() === monthCursor.getMonth();
+                const key = dateKey(day);
+                const dayPosts = postsByDay.get(key) ?? [];
+                const isToday = key === dateKey(new Date());
+                return (
+                  <div
+                    key={key}
+                    className={`min-h-[110px] rounded-[10px] border border-black/5 bg-white p-1.5 ${
+                      inMonth ? "" : "opacity-40"
+                    } ${isToday ? "ring-2 ring-foreman/40" : ""}`}
+                  >
+                    <p
+                      className={`mb-1 px-0.5 text-xs font-bold tabular-nums ${
+                        isToday ? "text-foreman" : "text-muted"
+                      }`}
                     >
-                      <div className="flex flex-col gap-1.5">
-                        {cellPosts.map((post) => (
-                          <CalendarCard
-                            key={post.id}
-                            post={post}
-                            active={selectedId === post.id}
-                            onClick={() => {
-                              setSelectedId(post.id);
-                              setEditing(false);
-                              setEditCaption(post.caption);
-                            }}
-                          />
-                        ))}
-                      </div>
+                      {day.getDate()}
+                    </p>
+                    <div className="flex flex-col gap-1">
+                      {dayPosts.map((post) => (
+                        <CalendarCard
+                          key={post.id}
+                          post={post}
+                          active={selectedId === post.id}
+                          onClick={() => {
+                            setSelectedId(post.id);
+                            setEditing(false);
+                            setEditCaption(post.caption);
+                          }}
+                        />
+                      ))}
                     </div>
-                  );
-                })}
-              </div>
-            ))}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>
@@ -443,8 +519,8 @@ export function SocialsPanel({ brandId }: Props) {
         />
       ) : (
         <p className="text-center text-sm text-muted">
-          Click a post on the calendar to approve or edit it. Change posting
-          frequency in Settings.
+          Click a post to approve or edit it, or greenlight the remaining month
+          above. Change posting frequency in Settings.
         </p>
       )}
     </div>
@@ -731,38 +807,30 @@ function Banner({ text }: { text: string }) {
   );
 }
 
-function startOfWeek(date: Date) {
+function startOfMonth(date: Date) {
   const d = new Date(date);
+  d.setDate(1);
   d.setHours(0, 0, 0, 0);
-  const day = d.getDay();
-  const diff = day === 0 ? -6 : 1 - day; // Monday start
-  d.setDate(d.getDate() + diff);
   return d;
+}
+
+/** Monday-first 6-week grid covering the visible month. */
+function buildMonthGrid(monthStart: Date) {
+  const first = startOfMonth(monthStart);
+  const weekday = first.getDay(); // 0 Sun
+  const mondayOffset = weekday === 0 ? -6 : 1 - weekday;
+  const gridStart = new Date(first);
+  gridStart.setDate(first.getDate() + mondayOffset);
+
+  return Array.from({ length: 42 }, (_, i) => {
+    const d = new Date(gridStart);
+    d.setDate(gridStart.getDate() + i);
+    return d;
+  });
 }
 
 function dateKey(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-function nearestHourRow(hour: number) {
-  let best = HOUR_ROWS[0]!;
-  let bestDist = Math.abs(hour - best);
-  for (const row of HOUR_ROWS) {
-    const dist = Math.abs(hour - row);
-    if (dist < bestDist) {
-      best = row;
-      bestDist = dist;
-    }
-  }
-  return best;
-}
-
-function formatHourLabel(hour: number) {
-  const d = new Date();
-  d.setHours(hour, 0, 0, 0);
-  return new Intl.DateTimeFormat(undefined, {
-    hour: "numeric",
-  }).format(d);
 }
 
 function formatWhen(iso: string) {

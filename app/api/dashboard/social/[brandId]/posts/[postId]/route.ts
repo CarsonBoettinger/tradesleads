@@ -16,7 +16,7 @@ import {
 type Ctx = { params: Promise<{ brandId: string; postId: string }> };
 
 export async function PATCH(request: Request, context: Ctx) {
-  const crossOrigin = rejectCrossOrigin(request);
+  const crossOrigin = await rejectCrossOrigin(request);
   if (crossOrigin) return crossOrigin;
 
   const session = await requireDashboardUser();

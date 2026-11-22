@@ -50,6 +50,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
+      url: absoluteUrl("/about"),
+      lastModified: SITE_UPDATED_AT,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: absoluteUrl("/how-it-works"),
+      lastModified: SITE_UPDATED_AT,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: absoluteUrl("/pricing"),
+      lastModified: SITE_UPDATED_AT,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: absoluteUrl("/contact"),
+      lastModified: SITE_UPDATED_AT,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: absoluteUrl("/privacy"),
       lastModified: new Date("2026-11-17"),
       changeFrequency: "yearly",
@@ -61,12 +85,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "yearly",
       priority: 0.3,
     },
-    ...trades.map((trade) => ({
-      url: absoluteUrl(tradeHref(trade.slug)),
-      lastModified: SITE_UPDATED_AT,
-      changeFrequency: "monthly" as const,
-      priority: 0.85,
-    })),
+    ...trades
+      .filter((trade) => trade.indexable)
+      .map((trade) => ({
+        url: absoluteUrl(tradeHref(trade.slug)),
+        lastModified: SITE_UPDATED_AT,
+        changeFrequency: "monthly" as const,
+        priority: 0.85,
+      })),
     ...services.map((service) => ({
       url: absoluteUrl(serviceHref(service.slug)),
       lastModified: SITE_UPDATED_AT,

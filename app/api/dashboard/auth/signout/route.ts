@@ -3,7 +3,7 @@ import { rejectCrossOrigin } from "@/lib/http-guard";
 import { createServerSupabase } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
-  const crossOrigin = rejectCrossOrigin(request, { requireOrigin: true });
+  const crossOrigin = await rejectCrossOrigin(request, { requireOrigin: true });
   if (crossOrigin) return crossOrigin;
 
   const supabase = await createServerSupabase();

@@ -15,7 +15,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Deploy on Netlify
 
-Next.js 16 runs on Netlify with the OpenNext adapter (applied automatically — do not pin `@netlify/plugin-nextjs`).
+Next.js 16 runs on Netlify with the OpenNext adapter (applied automatically - do not pin `@netlify/plugin-nextjs`).
 
 1. Push this repo and [add a new site from Git](https://app.netlify.com/start) in Netlify.
 2. Build settings are in `netlify.toml` (`npm run build`, publish `.next`, Node 20).
