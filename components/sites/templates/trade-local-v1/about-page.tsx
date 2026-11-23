@@ -9,6 +9,12 @@ import {
   SiteFooter,
   SiteHeader,
 } from "@/components/sites/templates/trade-local-v1/chrome";
+import { resolveWhyUsIcon } from "@/components/sites/templates/trade-local-v1/icons";
+import {
+  IconBadge,
+  OverlappingPhotos,
+  SectionEyebrow,
+} from "@/components/sites/templates/trade-local-v1/ui";
 import { siteHref } from "@/lib/sites/paths";
 
 function themeStyle(theme: SiteTheme): React.CSSProperties {
@@ -43,10 +49,13 @@ export function TradeLocalV1AboutPage({
     assets.find((a) => a.kind === "logo" && a.public_url) ??
     assets.find((a) => a.kind === "logo") ??
     null;
-  const photo =
-    assets.find((a) => a.kind === "gallery" && a.public_url) ??
-    assets.find((a) => a.kind === "hero" && a.public_url) ??
-    null;
+  const photos = assets.filter(
+    (a) =>
+      a.public_url &&
+      (a.kind === "gallery" || a.kind === "hero" || a.kind === "og"),
+  );
+  const primaryPhoto = photos[0] ?? null;
+  const secondaryPhoto = photos[1] ?? null;
 
   if (!content?.about) {
     return (
@@ -68,17 +77,35 @@ export function TradeLocalV1AboutPage({
       />
 
       <main>
-        <section className="border-b border-black/5 bg-[color:var(--site-surface)]">
-          <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center">
+        <section className="border-b border-black/5 bg-white">
+          <div className="mx-auto grid max-w-6xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-16 md:py-20">
+            {primaryPhoto?.public_url ? (
+              <div className="pb-8 lg:pb-6">
+                <OverlappingPhotos
+                  primary={primaryPhoto.public_url}
+                  secondary={secondaryPhoto?.public_url}
+                  primaryAlt={
+                    content.imageAlts?.about ??
+                    content.imageAlts?.hero ??
+                    `${brand.name} about us`
+                  }
+                  secondaryAlt={
+                    content.imageAlts?.["gallery-1"] ??
+                    `${brand.name} project photo`
+                  }
+                  primaryWidth={primaryPhoto.width}
+                  primaryHeight={primaryPhoto.height}
+                  secondaryWidth={secondaryPhoto?.width}
+                  secondaryHeight={secondaryPhoto?.height}
+                />
+              </div>
+            ) : null}
             <div>
-              <p
-                className="text-sm font-bold uppercase tracking-[0.16em]"
-                style={{ color: theme.accent }}
-              >
-                About Us
-              </p>
-              <h1 className="mt-3 text-4xl font-extrabold tracking-tight">
+              <SectionEyebrow color={theme.accent}>
                 {content.about.heading}
+              </SectionEyebrow>
+              <h1 className="mt-3 text-4xl font-extrabold tracking-tight">
+                {brand.name}
               </h1>
               <p className="mt-5 text-base leading-relaxed text-[color:var(--site-muted)]">
                 {content.about.body}
@@ -100,44 +127,37 @@ export function TradeLocalV1AboutPage({
                 </a>
               </div>
             </div>
-            {photo?.public_url ? (
-              <div className="overflow-hidden rounded-[18px] border border-black/5 shadow-sm">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={photo.public_url}
-                  alt={
-                    content.imageAlts?.about ??
-                    content.imageAlts?.hero ??
-                    `${brand.name} about us`
-                  }
-                  width={photo.width ?? 1200}
-                  height={photo.height ?? 900}
-                  className="h-full max-h-[480px] w-full object-cover"
-                  loading="eager"
-                  decoding="async"
-                />
-              </div>
-            ) : null}
           </div>
         </section>
 
         {content.whyUs?.length ? (
-          <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-            <h2 className="text-3xl font-extrabold tracking-tight">
-              Why homeowners choose us
-            </h2>
-            <div className="mt-8 grid gap-5 md:grid-cols-3">
-              {content.whyUs.map((item) => (
-                <article
-                  key={item.title}
-                  className="rounded-[14px] border border-black/5 bg-white p-5"
-                >
-                  <h3 className="text-lg font-bold">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-[color:var(--site-muted)]">
-                    {item.body}
-                  </p>
-                </article>
-              ))}
+          <section className="border-t border-black/5 bg-[color:var(--site-surface)]">
+            <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-20">
+              <div className="mx-auto max-w-2xl text-center">
+                <SectionEyebrow color={theme.accent}>Why us</SectionEyebrow>
+                <h2 className="mt-3 text-3xl font-extrabold tracking-tight">
+                  Why homeowners choose us
+                </h2>
+              </div>
+              <div className="mt-12 grid gap-10 md:grid-cols-3 lg:gap-8">
+                {content.whyUs.map((item) => (
+                  <article
+                    key={item.title}
+                    className="flex flex-col items-center rounded-[18px] border border-black/5 bg-white px-6 py-8 text-center shadow-[0_12px_28px_-24px_rgba(0,0,0,0.45)]"
+                  >
+                    <IconBadge
+                      icon={resolveWhyUsIcon(item.title)}
+                      color={theme.primary}
+                    />
+                    <h3 className="mt-5 text-lg font-bold tracking-tight">
+                      {item.title}
+                    </h3>
+                    <p className="mt-3 text-sm leading-relaxed text-[color:var(--site-muted)]">
+                      {item.body}
+                    </p>
+                  </article>
+                ))}
+              </div>
             </div>
           </section>
         ) : null}

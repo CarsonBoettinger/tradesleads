@@ -9,6 +9,11 @@ import {
   SiteFooter,
   SiteHeader,
 } from "@/components/sites/templates/trade-local-v1/chrome";
+import { resolveServiceIcon } from "@/components/sites/templates/trade-local-v1/icons";
+import {
+  IconBadge,
+  SectionEyebrow,
+} from "@/components/sites/templates/trade-local-v1/ui";
 import { areaPageCopy, areaSlug } from "@/lib/sites/areas";
 import { siteHref } from "@/lib/sites/paths";
 import { ensureMinimumServices } from "@/lib/sites/services";
@@ -82,14 +87,9 @@ export function TradeLocalV1AreaPage({
       />
 
       <main>
-        <section className="border-b border-black/5 bg-[color:var(--site-surface)]">
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-            <p
-              className="text-sm font-bold uppercase tracking-[0.16em]"
-              style={{ color: theme.accent }}
-            >
-              Service area
-            </p>
+        <section className="border-b border-black/5 bg-white">
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-20">
+            <SectionEyebrow color={theme.accent}>Service area</SectionEyebrow>
             <h1 className="mt-3 max-w-3xl text-4xl font-extrabold tracking-tight">
               {copy.h1}
             </h1>
@@ -121,38 +121,58 @@ export function TradeLocalV1AreaPage({
         </section>
 
         {content.services?.length ? (
-          <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-            <h2 className="text-3xl font-extrabold tracking-tight">
-              Services in {areaName}
-            </h2>
-            <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {content.services.slice(0, 6).map((service) => (
-                <article
-                  key={service.name}
-                  className="rounded-[14px] border border-black/5 bg-white p-5"
-                >
-                  <h3 className="text-lg font-bold">{service.name}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-[color:var(--site-muted)]">
-                    {service.description}
-                  </p>
-                </article>
-              ))}
+          <section
+            className="relative border-t-4 bg-[color:var(--site-surface)]"
+            style={{ borderColor: theme.accent }}
+          >
+            <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-20">
+              <div className="mx-auto max-w-2xl text-center">
+                <SectionEyebrow color={theme.accent}>
+                  Our services
+                </SectionEyebrow>
+                <h2 className="mt-3 text-3xl font-extrabold tracking-tight">
+                  Services in {areaName}
+                </h2>
+              </div>
+              <div className="mt-12 grid gap-10 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+                {content.services.slice(0, 6).map((service) => (
+                  <article
+                    key={service.name}
+                    className="flex flex-col items-center text-center"
+                  >
+                    <IconBadge
+                      icon={resolveServiceIcon(service.name)}
+                      color={theme.accent}
+                      size="lg"
+                    />
+                    <h3 className="mt-5 text-lg font-bold tracking-tight">
+                      {service.name}
+                    </h3>
+                    <p className="mt-3 max-w-sm text-sm leading-relaxed text-[color:var(--site-muted)]">
+                      {service.description}
+                    </p>
+                  </article>
+                ))}
+              </div>
             </div>
           </section>
         ) : null}
 
         {otherAreas.length ? (
-          <section className="border-t border-black/5 bg-[color:var(--site-surface)]">
-            <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-              <h2 className="text-3xl font-extrabold tracking-tight">
-                Other areas we serve
-              </h2>
+          <section className="border-t border-black/5 bg-white">
+            <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-20">
+              <div className="max-w-2xl">
+                <SectionEyebrow color={theme.accent}>Coverage</SectionEyebrow>
+                <h2 className="mt-3 text-3xl font-extrabold tracking-tight">
+                  Other areas we serve
+                </h2>
+              </div>
               <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {otherAreas.map((area) => (
                   <a
                     key={area.name}
                     href={siteHref(basePath, `/areas/${areaSlug(area.name)}`)}
-                    className="rounded-[12px] border border-black/5 bg-white p-4 transition hover:border-black/15"
+                    className="rounded-[14px] border border-black/5 bg-[color:var(--site-surface)] p-5 transition hover:border-black/15 hover:shadow-sm"
                   >
                     <h3 className="font-bold">{area.name}</h3>
                     <p className="mt-2 text-sm text-[color:var(--site-muted)]">

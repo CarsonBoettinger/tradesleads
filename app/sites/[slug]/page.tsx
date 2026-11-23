@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { notFound } from "next/navigation";
 import { TradeLocalV1Site } from "@/components/sites/templates/trade-local-v1/site";
 import { JsonLd } from "@/components/json-ld";
+import { faqJsonLd } from "@/lib/seo";
 import {
   getBrandAssets,
   getBrandBySlug,
@@ -11,10 +12,12 @@ import {
 } from "@/lib/sites/brands";
 import { normalizeOpeningHours } from "@/lib/sites/hours";
 import { getGeneratedSiteBasePath } from "@/lib/sites/paths";
+import { ensureMinimumServices } from "@/lib/sites/services";
 import {
   brandSiteCanonical,
   brandSiteRobots,
 } from "@/lib/sites/site-meta";
+import type { SiteContent } from "@/lib/sites/types";
 
 export const instant = false;
 
@@ -65,6 +68,11 @@ export default async function GeneratedSitePage({ params }: Props) {
 
   if (!config) notFound();
 
+  const content = config.content as SiteContent;
+  const services = ensureMinimumServices(content?.services, {
+    trade: brand.trade,
+    town: brand.town,
+  });
   const hours = normalizeOpeningHours(profile?.payload?.hours);
   const openingHoursSpecification = hours
     .filter((row) => row.value && !/closed/i.test(row.value))
@@ -75,6 +83,27 @@ export default async function GeneratedSitePage({ params }: Props) {
     }));
 
   const canonical = brandSiteCanonical(brand);
+  const ratedTestimonials = (content?.testimonials ?? []).filter(
+    (item) => typeof item.rating === "number" && item.rating > 0,
+  );
+  const aggregateRating =
+    ratedTestimonials.length > 0
+      ? {
+          "@type": "AggregateRating",
+          ratingValue: Number(
+            (
+              ratedTestimonials.reduce(
+                (sum, item) => sum + (item.rating ?? 0),
+                0,
+              ) / ratedTestimonials.length
+            ).toFixed(1),
+          ),
+          reviewCount: ratedTestimonials.length,
+          bestRating: 5,
+          worstRating: 1,
+        }
+      : undefined;
+
   const localBusiness = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -98,11 +127,34 @@ export default async function GeneratedSitePage({ params }: Props) {
     openingHoursSpecification: openingHoursSpecification.length
       ? openingHoursSpecification
       : undefined,
+    aggregateRating,
+    hasOfferCatalog: services.length
+      ? {
+          "@type": "OfferCatalog",
+          name: `${brand.name} services`,
+          itemListElement: services.map((service) => ({
+            "@type": "Offer",
+            itemOffered: {
+              "@type": "Service",
+              name: service.name,
+              description: service.description,
+              provider: {
+                "@type": "LocalBusiness",
+                name: brand.name,
+              },
+              areaServed: brand.town ?? undefined,
+            },
+          })),
+        }
+      : undefined,
   };
+
+  const faqs = content?.faqs ?? [];
 
   return (
     <>
       <JsonLd data={localBusiness} />
+      {faqs.length > 0 ? <JsonLd data={faqJsonLd(faqs)} /> : null}
       <TradeLocalV1Site
         brand={brand}
         config={config}

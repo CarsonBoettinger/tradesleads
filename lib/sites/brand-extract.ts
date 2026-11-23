@@ -2,7 +2,6 @@ import "server-only";
 
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { generateAndStoreAiPhotos } from "@/lib/sites/ai-images";
-import { generateAndStoreHeroVideo } from "@/lib/sites/ai-video";
 import {
   DEFAULT_THEME,
   pickPrimaryColor,
@@ -403,31 +402,7 @@ export async function extractAndCacheAssets(input: {
     }
   }
 
-  const heroStill = cached.find(
-    (a) => a.kind === "hero" && typeof a.public_url === "string",
-  );
-  if (heroStill?.public_url) {
-    try {
-      const heroVideo = await generateAndStoreHeroVideo({
-        brandId: input.brandId,
-        imageUrl: heroStill.public_url as string,
-        businessName: input.businessName,
-        trade: input.trade,
-        town: input.town,
-      });
-      if (heroVideo) {
-        cached.push(heroVideo);
-      } else {
-        console.warn("[hero-video] skipped for brand", input.brandId);
-      }
-    } catch (error) {
-      console.warn(
-        "[hero-video] unexpected error",
-        error instanceof Error ? error.message : error,
-      );
-    }
-  }
-
+  // Hero stays a still image by default (no Ken Burns / generated MP4).
   return { assets: cached, logoColors };
 }
 
